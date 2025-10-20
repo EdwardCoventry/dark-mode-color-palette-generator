@@ -1,0 +1,132 @@
+/* ------- layout ------- */
+:root { color-scheme: light; }
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.container {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+  min-height: 0;
+  position: relative;
+  align-items: stretch;
+  max-width: 100vw;
+}
+
+.controls {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .4rem;
+  padding: 0;
+  pointer-events: none;
+}
+
+.kbd-hint {
+  color: #666;
+  font-size: .95rem;
+  user-select: none;
+  pointer-events: none;
+}
+
+.color-columns {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex-direction: row;
+  width: 100%;
+}
+
+.color-col {
+  flex: 1;
+  position: relative;
+  cursor: copy;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+/* Prevent dark-mode/forced adjustments on palette UI */
+.palette-page .color-columns,
+.palette-page .color-col,
+.palette-page .color-col * {
+  color-scheme: light;
+  forced-color-adjust: none;
+  mix-blend-mode: normal;
+  background-blend-mode: normal;
+  filter: none;
+}
+
+.color-col .info {
+  position: absolute;
+  inset: auto 0 clamp(1rem, 4vh, 2.5rem) 0;
+  text-align: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: clamp(.9rem, 2vw, 1.1rem);
+  line-height: 1.35;
+  pointer-events: auto;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .35rem;
+  padding: 0 .35rem;
+}
+
+.color-col .hex { opacity: .95; }
+.color-col .name { opacity: .8; }
+
+/* Lock button now sits inside the overlay stack */
+.lock-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, .85);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: .2s ease;
+  pointer-events: auto;
+}
+
+.lock-btn:hover { background: rgba(255, 255, 255, .15); }
+.color-col[data-locked="true"] .lock-btn {
+  background: rgba(255, 255, 255, .95);
+  color: #000;
+  border-color: transparent;
+}
+.lock-btn:focus { outline: 2px solid rgba(255, 255, 255, .6); outline-offset: 2px; }
+
+#generateBtn {
+  padding: .6em 1.6em;
+  font-size: 1rem;
+  cursor: pointer;
+  pointer-events: auto;
+}
+#generateBtn:focus-visible { outline: 2px solid #000; outline-offset: 2px; }
+
+.palette-page.embedded .kbd-hint { display: none; }
+@media (hover: none), (pointer: coarse) { .palette-page .kbd-hint { display: none; } }
+

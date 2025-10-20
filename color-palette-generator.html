@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" class="palette-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Palette Generator</title>
+  <link rel="stylesheet" href="/src/styles.css">
+  <style>
+    /* ------- layout ------- */
+    body {display:flex; flex-direction:column; min-height:100dvh;}
+    /* container now stretches fully between header & footer */
+    .container{flex:1 1 auto; display:flex; flex-direction:column; padding:0; gap:0; min-height:0; position:relative; align-items:stretch; max-width:100vw;}
+    .controls{position:absolute; top:0.5rem; left:50%; transform:translateX(-50%); z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:.4rem; padding:0; pointer-events:none;}
+    .kbd-hint{color:#666; font-size:.95rem; user-select:none; pointer-events:none;}
+    .color-columns{flex:1 1 auto; display:flex; min-height:0; min-width:0; flex-direction: row; width:100%;}
+    .color-col   {flex:1; position:relative; cursor:copy; min-width:0;}
+
+    /* Hide keyboard/copy hint when embedded in an iframe */
+    .palette-page.embedded .kbd-hint { display: none; }
+    /* Hide keyboard hint on touch devices (mobile/tablet) */
+    @media (hover: none), (pointer: coarse) {
+      .palette-page .kbd-hint { display: none; }
+    }
+
+    /* ------- ensure palette colors are immune to dark mode/forced adjustments ------- */
+    .palette-page .color-columns,
+    .palette-page .color-col,
+    .palette-page .color-col * {
+      color-scheme: light;          /* don’t auto-adjust UI colors */
+      forced-color-adjust: none;    /* prevent UA forced color modes */
+      mix-blend-mode: normal;       /* no blending tricks */
+      background-blend-mode: normal;
+      filter: none;                 /* avoid accidental filters */
+    }
+
+    /* ------- info overlay ------- */
+    .color-col .info{
+      position:absolute; inset:auto 0 clamp(1rem,4vh,2.5rem) 0;
+      text-align:center; color:#fff; font-weight:600;
+      font-size:clamp(.9rem,2vw,1.1rem); line-height:1.35;
+      pointer-events:auto; user-select:none;
+      display:flex; flex-direction:column; align-items:center; gap:.35rem;
+      padding: 0 .35rem; /* tiny horizontal padding so text doesn’t touch edges */
+    }
+    .color-col .hex{opacity:.95}
+    .color-col .name{opacity:.8}
+
+    /* ------- lock button (now inside overlay, above hex) ------- */
+    .lock-btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:2.1rem; height:2.1rem; border-radius:999px;
+      border:2px solid rgba(255,255,255,.85); background:transparent; color:#fff;
+      cursor:pointer; transition:.2s ease; pointer-events:auto;
+    }
+    .lock-btn:hover{background:rgba(255,255,255,.15)}
+    .color-col[data-locked="true"] .lock-btn{background:rgba(255,255,255,.95); color:#000; border-color:transparent}
+    .lock-btn:focus{outline:2px solid rgba(255,255,255,.6); outline-offset:2px}
+
+    /* ------- generate button ------- */
+    #generateBtn{
+      padding:.6em 1.6em; font-size:1rem; cursor:pointer; pointer-events:auto;
+    }
+    #generateBtn:focus-visible {
+      outline: 2px solid #000; /* ensure keyboard focus is clearly visible */
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <site-header></site-header>
+
+  <div class="container">
+    <div class="controls">
+      <div class="kbd-hint">Space to generate • 1–4 to lock</div>
+      <button id="generateBtn" class="button" autofocus>Generate</button>
+    </div>
+    <div class="color-columns">
+      <div class="color-col" id="col0" data-index="0" data-locked="false" title="Click to copy hex">
+        <div class="info">
+          <button class="lock-btn" aria-pressed="false" aria-label="Lock column 1" title="Lock (1)">🔒</button>
+          <div class="hex"></div>
+          <div class="name"></div>
+        </div>
+      </div>
+      <div class="color-col" id="col1" data-index="1" data-locked="false" title="Click to copy hex">
+        <div class="info">
+          <button class="lock-btn" aria-pressed="false" aria-label="Lock column 2" title="Lock (2)">🔒</button>
+          <div class="hex"></div>
+          <div class="name"></div>
+        </div>
+      </div>
+      <div class="color-col" id="col2" data-index="2" data-locked="false" title="Click to copy hex">
+        <div class="info">
+          <button class="lock-btn" aria-pressed="false" aria-label="Lock column 3" title="Lock (3)">🔒</button>
+          <div class="hex"></div>
+          <div class="name"></div>
+        </div>
+      </div>
+      <div class="color-col" id="col3" data-index="3" data-locked="false" title="Click to copy hex">
+        <div class="info">
+          <button class="lock-btn" aria-pressed="false" aria-label="Lock column 4" title="Lock (4)">🔒</button>
+          <div class="hex"></div>
+          <div class="name"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/js/components/header.js"></script>
+  <script type="module" src="/src/js/pages/color-palette-generator.js"></script>
+  <script type="module" src="/src/js/components/footer.js"></script>
+
+  <site-footer></site-footer>
+</body>
+</html>

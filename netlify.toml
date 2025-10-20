@@ -1,0 +1,20 @@
+[build]
+command = "npm run build"
+publish = "dist"
+
+# Explicit embed aliases first, so they aren’t shadowed by the SPA fallback
+[[redirects]]
+from = "/embed"
+to = "/embed.html"
+status = 200
+
+[[redirects]]
+from = "/embed/color-palette-generator"
+to = "/embed.html"
+status = 200
+
+# SPA fallback to the main palette page
+[[redirects]]
+from = "/*"
+to = "/color-palette-generator.html"
+status = 200
