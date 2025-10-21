@@ -83,9 +83,18 @@
     }
     #generateBtn:hover { background: #ececec; }
     #generateBtn:active { transform: translateY(1px); }
-    #generateBtn:focus-visible {
-      outline: 2px solid #000; /* ensure keyboard focus is clearly visible */
-      outline-offset: 2px;
+    #generateBtn:focus-visible { outline: 2px solid #000; outline-offset: 2px; }
+
+    /* Desktop theming for Generate button */
+    @media (prefers-color-scheme: light) {
+      #generateBtn { background: #fff; color: #111; border-color: rgba(0,0,0,.15); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+      #generateBtn:hover { background: #f7f7f7; }
+      #generateBtn:focus-visible { outline-color: #000; }
+    }
+    @media (prefers-color-scheme: dark) {
+      #generateBtn { background: rgba(0,0,0,.92); color: #fff; border-color: rgba(255,255,255,.2); box-shadow: 0 6px 16px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.05) inset; }
+      #generateBtn:hover { background: rgba(0,0,0,.98); }
+      #generateBtn:focus-visible { outline-color: #fff; }
     }
 
     /* ------- mobile: invert layout (controls bottom, info top) + improved spacing & button style ------- */
@@ -100,14 +109,25 @@
       /* Revert name size to default on mobile */
       .color-col .name { font-size: inherit; }
 
-      /* Mobile-first button improvements */
+      /* Mobile button size/shape; colors themed below */
       #generateBtn{
         font-size: 1.05rem; line-height: 1.1;
         padding: .9rem 1.5rem; border-radius: 9999px; min-height: 44px; min-width: min(80vw, 22rem);
-        background: rgba(0,0,0,.86); color: #fff; border: 1px solid rgba(255,255,255,.2);
-        box-shadow: 0 6px 16px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.05) inset;
       }
-      #generateBtn:hover { background: rgba(0,0,0,.9); }
+      #generateBtn:active { transform: translateY(1px); }
+      #generateBtn:focus-visible { outline-width: 2px; }
+    }
+
+    /* Mobile theming: light */
+    @media (max-width: 700px) and (prefers-color-scheme: light), (hover: none) and (prefers-color-scheme: light), (pointer: coarse) and (prefers-color-scheme: light) {
+      #generateBtn { background: #fff; color: #111; border: 1px solid rgba(0,0,0,.15); box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+      #generateBtn:hover { background: #f7f7f7; }
+      #generateBtn:focus-visible { outline-color: #000; }
+    }
+    /* Mobile theming: dark */
+    @media (max-width: 700px) and (prefers-color-scheme: dark), (hover: none) and (prefers-color-scheme: dark), (pointer: coarse) and (prefers-color-scheme: dark) {
+      #generateBtn { background: rgba(0,0,0,.92); color: #fff; border: 1px solid rgba(255,255,255,.2); box-shadow: 0 6px 16px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.05) inset; }
+      #generateBtn:hover { background: rgba(0,0,0,.98); }
       #generateBtn:focus-visible { outline-color: #fff; }
     }
   </style>
@@ -117,7 +137,8 @@
 
   <div class="container">
     <div class="controls">
-      <div class="kbd-hint">Enter/Space to generate • 1–4 to lock</div>
+      <!-- Note: Enter also triggers generate, but we keep the hint short to avoid clutter. -->
+      <div class="kbd-hint">Space to generate • 1–4 to lock</div>
       <button id="generateBtn" class="button" autofocus>Generate</button>
     </div>
     <div class="color-columns">
