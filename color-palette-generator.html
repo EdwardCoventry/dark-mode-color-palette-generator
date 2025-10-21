@@ -39,11 +39,15 @@
       text-align:center; color:#fff; font-weight:600;
       font-size:clamp(.9rem,2vw,1.1rem); line-height:1.35;
       pointer-events:auto; user-select:none;
-      display:flex; flex-direction:column; align-items:center; gap:.35rem;
+      display:flex; flex-direction:column; align-items:center; gap:.55rem;
       padding: 0 .35rem; /* tiny horizontal padding so text doesn’t touch edges */
     }
-    .color-col .hex{opacity:.95}
-    .color-col .name{opacity:.8}
+    /* Desktop: show as Name → Hex → Lock so lock/hex stay anchored near the bottom even when name wraps */
+    .color-col .info .name { order: 1; }
+    .color-col .info .hex  { order: 2; }
+    .color-col .info .lock-btn { order: 3; }
+    .color-col .hex{opacity:.95; font-size: clamp(1.1rem, 2.8vw, 1.9rem); line-height: 1.2; font-weight: 800; letter-spacing: .03em;}
+    .color-col .name{opacity:.8; font-size: clamp(1rem, 1.8vw, 1.3rem);}
 
     /* Temporary copied hint (used on mobile) */
     .color-col .copied-hint { font-size: .85rem; opacity: .95; color: inherit; margin-top: .2rem; }
@@ -75,7 +79,13 @@
     @media (max-width: 700px), (hover: none), (pointer: coarse) {
       .controls { top: auto; bottom: calc(clamp(0.75rem, 2.5vh, 1.25rem) + env(safe-area-inset-bottom, 0px)); gap: .5rem; }
       .palette-page .kbd-hint { display: none !important; }
-      .color-col .info { inset: clamp(0.9rem, 3.5vh, 1.6rem) 0 auto 0; gap: .65rem; }
+      .color-col .info { inset: clamp(0.9rem, 3.5vh, 1.6rem) 0 auto 0; gap: .8rem; }
+      /* On mobile, keep original DOM order (Lock → Hex → Name) */
+      .color-col .info .name, .color-col .info .hex, .color-col .info .lock-btn { order: initial; }
+      /* Mobile: keep hex size, but make it slightly bolder with a touch of letter-spacing if it fits */
+      .color-col .hex { font-size: clamp(1rem, 4.2vw, 1.35rem); font-weight: 700; letter-spacing: .02em; }
+      /* Revert name size to default on mobile */
+      .color-col .name { font-size: inherit; }
 
       /* Mobile-first button improvements */
       #generateBtn{
@@ -94,7 +104,7 @@
 
   <div class="container">
     <div class="controls">
-      <div class="kbd-hint">Space to generate • 1–4 to lock</div>
+      <div class="kbd-hint">Enter/Space to generate • 1–4 to lock</div>
       <button id="generateBtn" class="button" autofocus>Generate</button>
     </div>
     <div class="color-columns">
