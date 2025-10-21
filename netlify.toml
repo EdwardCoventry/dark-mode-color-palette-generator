@@ -2,19 +2,30 @@
 command = "npm run build"
 publish = "dist"
 
-# Explicit embed aliases first, so they aren’t shadowed by the SPA fallback
+# ---- apps variant ----
 [[redirects]]
-from = "/embed"
-to = "/embed.html"
+from = "/apps/dark-mode-color-palette-generator"
+to   = "/index.html"
 status = 200
 
 [[redirects]]
-from = "/embed/color-palette-generator"
-to = "/embed.html"
+from = "/apps/dark-mode-color-palette-generator/assets/*"
+to   = "/assets/:splat"
 status = 200
 
-# SPA fallback to the main palette page
 [[redirects]]
-from = "/*"
-to = "/color-palette-generator.html"
+from = "/apps/dark-mode-color-palette-generator/*"
+to   = "/index.html"
+status = 200
+
+# ---- embed variant ----
+
+[[redirects]]
+from = "/embed/dark-mode-color-palette-generator"
+to   = "/embed.html"
+status = 200
+
+[[redirects]]
+from = "/embed/dark-mode-color-palette-generator/*"
+to   = "/embed.html"
 status = 200
