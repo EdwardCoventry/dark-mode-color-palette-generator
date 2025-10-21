@@ -1,4 +1,31 @@
-import { SHADES_OF_BLACK, hexFromName, nameFromHex } from '../palette/black-palette-name-pool.js';
+import { SHADES_OF_BLACK } from '../../data/shades-of-black.js';
+
+// Build reverse lookup once: VV -> preferred name. Choose the first occurrence to keep names stable.
+const COMPONENT_TO_NAME = (() => {
+  const map = Object.create(null);
+  for (const [name, comp] of Object.entries(SHADES_OF_BLACK || {})) {
+    const key = String(comp || '').toUpperCase().padStart(2, '0');
+    if (!/^[0-9A-F]{2}$/.test(key)) continue;
+    if (!map[key]) map[key] = name;
+  }
+  return map;
+})();
+
+function hexFromName (name) {
+  const comp = (SHADES_OF_BLACK && SHADES_OF_BLACK[name]) ? String(SHADES_OF_BLACK[name]).toUpperCase().padStart(2, '0') : null;
+  if (!comp || !/^[0-9A-F]{2}$/.test(comp)) return null;
+  return `#${comp}${comp}${comp}`;
+}
+
+function nameFromHex (hex) {
+  if (!hex) return '';
+  const norm = normalizeHex6(hex);
+  if (!norm) return '';
+  const raw = norm.replace(/^#/, '');
+  const r = raw.slice(0,2), g = raw.slice(2,4), b = raw.slice(4,6);
+  if (r !== g || g !== b) return '';
+  return COMPONENT_TO_NAME[r] || '';
+}
 
 /* ----- helpers ------------------------------------------------------- */
 // History behavior: 'push' creates entries for each generation; 'replace' keeps a single entry so Back leaves the page
@@ -365,6 +392,9 @@ function init () {
   } else {
     HISTORY_MODE = embedded ? 'replace' : 'push';
   }
+
+  // Optionally allow keyboard shortcuts even when embedded with ?keys=1 or ?keyboard=1/true
+  const allowKeyboard = !embedded || ['1','true','on'].includes((qp.get('keys') || '').toLowerCase()) || ['1','true','on'].includes((qp.get('keyboard') || '').toLowerCase());
 
   // Tag root element to enable CSS overrides when embedded
   const root = document.documentElement;
