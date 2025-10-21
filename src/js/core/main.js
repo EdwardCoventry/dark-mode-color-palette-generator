@@ -1,5 +1,8 @@
 import { SHADES_OF_BLACK } from '../../data/shades-of-black.js';
 
+// Optional context identifier for embedded mode (supplied via ?ctx=... or ?id=...)
+let EMBED_CTX = null;
+
 // Build reverse lookup once: VV -> preferred name. Choose the first occurrence to keep names stable.
 const COMPONENT_TO_NAME = (() => {
   const map = Object.create(null);
@@ -136,6 +139,46 @@ function columns () {
   return [...document.querySelectorAll('.color-col')];
 }
 
+function currentShadesHexList () {
+  return columns().map(c => (c.dataset.shade || '#000000').toUpperCase());
+}
+
+function currentHashString () {
+  return currentShadesHexList().map(h => h.slice(1)).join('-');
+}
+
+function buildOpenUrlWithState(baseUrl, { forceReplaceHistory = true } = {}) {
+  try {
+    const u = new URL(baseUrl, location.origin);
+    if (forceReplaceHistory) {
+      const existing = (u.searchParams.get('history') || u.searchParams.get('hist') || '').toLowerCase();
+      if (!existing) u.searchParams.set('history', 'replace');
+    }
+    const h = currentHashString();
+    if (h) u.hash = h;
+    return u.toString();
+  } catch {
+    // Fallback: naive concatenation
+    const q = forceReplaceHistory ? (baseUrl.includes('?') ? '&' : '?') + 'history=replace' : '';
+    const h = currentHashString();
+    return baseUrl + q + (h ? ('#' + h) : '');
+  }
+}
+
+function broadcastStateToParent({ embedded }) {
+  if (!embedded) return;
+  const payload = {
+    type: 'palette:update',
+    app: 'color-palette-generator',
+    ctx: EMBED_CTX,
+    shades: currentShadesHexList(),
+    hash: currentHashString(),
+    // Suggest adding history=replace when opening the full app, so Back returns to referrer
+    suggest: { history: 'replace' }
+  };
+  try { window.parent.postMessage(payload, '*'); } catch { /* noop */ }
+}
+
 function setColumnShade (col, hex, setName = true, name = null) {
   const info = col.querySelector('.info');
   col.style.background = hex;
@@ -186,6 +229,8 @@ function applyShades (shades, overwriteLocked = false) {
     setColumnShade(col, shades[i], true);
   }
   updateHashFromDOM();
+  // Notify parent (when embedded) so hosts can sync their Open button
+  broadcastStateToParent({ embedded: document.documentElement.classList.contains('embedded') });
 }
 
 function toggleLock (col) {
@@ -396,6 +441,9 @@ function init () {
   // Optionally allow keyboard shortcuts even when embedded with ?keys=1 or ?keyboard=1/true
   const allowKeyboard = !embedded || ['1','true','on'].includes((qp.get('keys') || '').toLowerCase()) || ['1','true','on'].includes((qp.get('keyboard') || '').toLowerCase());
 
+  // Capture optional embedding context to include in messages (helps when multiple iframes on a page)
+  EMBED_CTX = qp.get('ctx') || qp.get('id') || qp.get('source') || null;
+
   // Tag root element to enable CSS overrides when embedded
   const root = document.documentElement;
   if (embedded) root.classList.add('embedded');
@@ -472,6 +520,11 @@ function init () {
 
   // Ensure initial contrast styles are applied
   columns().forEach(col => applyContrastStyles(col, col.dataset.shade || '#000000'));
+
+  // Expose a tiny helper on window for host pages or dev tools
+  try { window.PaletteLinkManager = { buildOpenUrlWithState }; } catch { /* noop */ }
+  // Send initial state to parent (for embedded open button wiring)
+  broadcastStateToParent({ embedded });
 }
 
 // Boot
