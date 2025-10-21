@@ -18,6 +18,21 @@ from = "/apps/dark-mode-color-palette-generator/*"
 to   = "/index.html"
 status = 200
 
+[[redirects]]
+from = "/apps/color-palette-generator"
+to   = "/index.html"
+status = 200
+
+[[redirects]]
+from = "/apps/color-palette-generator/assets/*"
+to   = "/assets/:splat"
+status = 200
+
+[[redirects]]
+from = "/apps/color-palette-generator/*"
+to   = "/index.html"
+status = 200
+
 # ---- embed variant ----
 
 [[redirects]]
@@ -27,5 +42,15 @@ status = 200
 
 [[redirects]]
 from = "/embed/dark-mode-color-palette-generator/*"
+to   = "/embed.html"
+status = 200
+
+[[redirects]]
+from = "/embed/color-palette-generator"
+to   = "/embed.html"
+status = 200
+
+[[redirects]]
+from = "/embed/color-palette-generator/*"
 to   = "/embed.html"
 status = 200
