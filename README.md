@@ -9,11 +9,11 @@ A tiny grayscale color palette generator built with Vite.
 - `src/`
   - `styles.css` — shared styles
   - `js/`
-    - `pages/color-palette-generator.js` — palette page logic
+    - `pages/color-palette-generator.js` — palette page boot (loads core)
     - `data/shades-of-black.js` — grayscale names → hex component + helpers
     - `components/header.js` — <site-header> web component
     - `components/footer.js` — <site-footer> web component
-    - `core/main.js` — (not used in production; no longer referenced)
+    - `core/main.js` — app core (generation, events, keyboard, copy)
 - `vite.config.js` — multi-page config (index + color-palette-generator)
 - `netlify.toml` — SPA fallback to `color-palette-generator.html`
 
@@ -41,3 +41,4 @@ npm run preview
 - Space: regenerate unlocked columns
 - Keys 1–4: toggle lock for each column
 - Click a color: copies the hex to clipboard
+- Note: When embedded (`?embed=1`), keyboard shortcuts are disabled by default. Enable them with `?keys=1` (e.g., `?embed=1&keys=1`).

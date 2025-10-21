@@ -130,3 +130,7 @@ body {
 .palette-page.embedded .kbd-hint { display: none; }
 @media (hover: none), (pointer: coarse) { .palette-page .kbd-hint { display: none; } }
 
+/* --- mobile tweaks: increase spacing between lock / hex / name --- */
+@media (max-width: 700px), (hover: none), (pointer: coarse) {
+  .color-col .info { inset: clamp(0.9rem, 3.5vh, 1.6rem) 0 auto 0; gap: .65rem; }
+}

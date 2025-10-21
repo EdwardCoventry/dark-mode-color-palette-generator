@@ -256,6 +256,11 @@ export const SHADES_OF_BLACK = {
     'Dark Horse': '11',
     'Literally Black': '00',
 
+
+    'Frank Black': '0E',
+    'Jack Black': '10',
+    'Black Jack': '0D',
+
     // 'kcalb': '00',
 
 };

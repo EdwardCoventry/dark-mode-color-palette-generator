@@ -194,8 +194,10 @@ function generate ({respectLocks = true} = {}) {
   updateHashFromDOM();
 }
 
-function attachEvents (opts = { embedded: false }) {
+function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
   const cols = columns();
+  const embedded = Boolean(opts.embedded);
+  const allowKeyboard = (opts.allowKeyboard === undefined) ? !embedded : Boolean(opts.allowKeyboard);
 
   // Lock buttons
   cols.forEach(col => {
@@ -214,25 +216,78 @@ function attachEvents (opts = { embedded: false }) {
       const hexEl = col.querySelector('.hex');
       const nameEl = col.querySelector('.name');
       const hex = hexEl.textContent;
-      const prev = nameEl.textContent;
+
+      // Detect coarse pointer/touch (mobile)
+      const mqlCoarse = window.matchMedia ? (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(hover: none)').matches) : ('ontouchstart' in window);
+
+      // Ensure previous mobile hint is cleared if present
+      if (col._copiedHintTimeout) {
+        clearTimeout(col._copiedHintTimeout);
+        col._copiedHintTimeout = null;
+      }
+      const existingHint = col.querySelector('.copied-hint');
+      if (existingHint) existingHint.remove();
+
       try {
         await copyToClipboard(hex);
-        nameEl.textContent = 'Copied!';
+        if (mqlCoarse) {
+          // Mobile: show hint below the title instead of replacing it
+          const hint = document.createElement('div');
+          hint.className = 'copied-hint';
+          hint.textContent = 'Copied!';
+          nameEl.insertAdjacentElement('afterend', hint);
+          col._copiedHintTimeout = setTimeout(() => {
+            hint.remove();
+            col._copiedHintTimeout = null;
+          }, 1000);
+        } else {
+          // Desktop: temporarily replace the title
+          if (col._nameRevertTimeout) {
+            clearTimeout(col._nameRevertTimeout);
+            col._nameRevertTimeout = null;
+          }
+          nameEl.textContent = 'Copied!';
+          col._nameRevertTimeout = setTimeout(() => {
+            const currentHex = col.dataset.shade || '';
+            nameEl.textContent = nameFromHex(currentHex) || '';
+            col._nameRevertTimeout = null;
+          }, 800);
+        }
       } catch {
-        nameEl.textContent = 'Copy failed';
-      } finally {
-        setTimeout(() => { nameEl.textContent = prev; }, 800);
+        if (mqlCoarse) {
+          const hint = document.createElement('div');
+          hint.className = 'copied-hint';
+          hint.textContent = 'Copy failed';
+          nameEl.insertAdjacentElement('afterend', hint);
+          col._copiedHintTimeout = setTimeout(() => {
+            hint.remove();
+            col._copiedHintTimeout = null;
+          }, 1200);
+        } else {
+          if (col._nameRevertTimeout) {
+            clearTimeout(col._nameRevertTimeout);
+            col._nameRevertTimeout = null;
+          }
+          nameEl.textContent = 'Copy failed';
+          col._nameRevertTimeout = setTimeout(() => {
+            const currentHex = col.dataset.shade || '';
+            nameEl.textContent = nameFromHex(currentHex) || '';
+            col._nameRevertTimeout = null;
+          }, 1000);
+        }
       }
     });
   });
 
-  // Keyboard shortcuts (skip when embedded)
-  if (!opts.embedded) {
+  // Keyboard shortcuts
+  if (allowKeyboard) {
+    const isSpace = (e) => (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar');
+    const isEnter = (e) => (e.code === 'Enter' || e.key === 'Enter' || e.code === 'NumpadEnter');
     const handleKeyDown = (e) => {
       const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
       if (tag === 'input' || tag === 'textarea' || e.isComposing) return;
 
-      if (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar') {
+      if (isSpace(e) || isEnter(e)) {
         e.preventDefault();
         generate({respectLocks: true});
         return;
@@ -247,8 +302,15 @@ function attachEvents (opts = { embedded: false }) {
         }
       }
     };
-    // Listen on window to catch global key events when the window is focused
-    window.addEventListener('keydown', handleKeyDown);
+    const handleKeyUp = (e) => {
+      if (isSpace(e) || isEnter(e)) {
+        // Prevent default button/link activation on keyup when using shortcuts
+        e.preventDefault();
+      }
+    };
+    // Capture early to suppress default actions like button "click on Space/Enter"
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    window.addEventListener('keyup', handleKeyUp, { capture: true });
   }
 
   // Generate button
@@ -268,6 +330,9 @@ function init () {
   const embedFlag = qp.has('embed') && qp.get('embed') !== '0' && qp.get('embed') !== 'false';
   const inFrame = (() => { try { return window.self !== window.top; } catch { return true; } })();
   const embedded = inFrame || embedFlag;
+
+  // Optionally allow keyboard shortcuts even when embedded with ?keys=1
+  const allowKeyboard = !embedded || (qp.get('keys') === '1' || qp.get('keyboard') === '1');
 
   // Tag root element to enable CSS overrides when embedded
   const root = document.documentElement;
@@ -321,9 +386,11 @@ function init () {
     window.addEventListener('load', ensureFocus, { once: true });
     window.addEventListener('pageshow', (e) => { if (e.persisted) ensureFocus(); });
     document.addEventListener('visibilitychange', ensureFocus);
+    // When the window/tab gains focus, try to ensure key handling works instantly
+    window.addEventListener('focus', ensureFocus);
   }
 
-  attachEvents({ embedded });
+  attachEvents({ embedded, allowKeyboard });
 
   const fromHash = parseHash();
   if (fromHash) {
