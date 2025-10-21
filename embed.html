@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="robots" content="noindex, nofollow">
-    <meta http-equiv="refresh" content="0; url=/apps/color-palette-generator?embed=1">
     <meta name="color-scheme" content="light dark"/>
     <meta name="darkreader-lock"/>
     <title>Embed: color-palette-generator</title>
     <script>
         (function () {
             try {
-                var target = '/apps/color-palette-generator';
-                var search = window.location.search || '';
-                var qp = new URLSearchParams(search);
-                // Ensure embed mode is enabled
+                var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
+                var target = isLocal ? '/color-palette-generator.html' : '/apps/color-palette-generator';
+                var qp = new URLSearchParams(window.location.search || '');
                 if (!qp.has('embed')) qp.set('embed', '1');
                 var qs = qp.toString();
                 var next = target + (qs ? ('?' + qs) : '') + (window.location.hash || '');
-                if ((window.location.pathname + window.location.search + window.location.hash) !== next) {
+                var current = window.location.pathname + window.location.search + window.location.hash;
+                if (current !== next) {
                     window.location.replace(next);
                 }
             } catch (e) { /* noop */ }
@@ -26,7 +25,14 @@
 </head>
 <body>
 <noscript>
-    <p>Redirecting to <a href="/apps/color-palette-generator?embed=1">/apps/color-palette-generator?embed=1</a>…</p>
+    <p>Redirecting to <span id="ns-target">/apps/color-palette-generator?embed=1</span>…</p>
+    <script>
+        (function(){
+            var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
+            var target = (isLocal ? '/color-palette-generator.html' : '/apps/color-palette-generator') + '?embed=1';
+            document.getElementById('ns-target').textContent = target;
+        })();
+    </script>
 </noscript>
 </body>
 </html>

@@ -4,12 +4,12 @@ import { resolve } from 'node:path';
 export default defineConfig({
   base: '/',
   build: {
+    assetsDir: 'apps/color-palette-generator/assets',
     rollupOptions: {
       input: {
         index: resolve(__dirname, 'index.html'),
-        // Use the original basename as the key to keep dist/color-palette-generator.html
-        'color-palette-generator': resolve(__dirname, 'color-palette-generator.html'),
-        embed: resolve(__dirname, 'embed.html'),
+        'apps/color-palette-generator/index': resolve(__dirname, 'color-palette-generator.html'),
+        'embed/index': resolve(__dirname, 'embed.html'),
       }
     }
   },

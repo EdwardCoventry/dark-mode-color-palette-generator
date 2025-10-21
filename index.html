@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="robots" content="noindex, nofollow">
-    <meta http-equiv="refresh" content="0; url=/apps/color-palette-generator">
     <meta name="color-scheme" content="light dark"/>
     <meta name="darkreader-lock"/>
     <title>Color Palette Generator</title>
     <script>
         (function () {
             try {
-                var target = '/apps/color-palette-generator';
+                var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
+                var target = isLocal ? '/color-palette-generator.html' : '/apps/color-palette-generator';
                 var qp = new URLSearchParams(window.location.search || '');
                 // Ensure full-page: remove any embed flag arriving from elsewhere
                 if (qp.has('embed')) qp.delete('embed');
@@ -26,7 +26,18 @@
 </head>
 <body>
 <noscript>
-    <p>Redirecting to <a href="/apps/color-palette-generator">/apps/color-palette-generator</a>…</p>
+    <p>
+        Redirecting to
+        <span id="ns-target">/apps/color-palette-generator</span>
+        …
+    </p>
+    <script>
+        (function(){
+            var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
+            var target = isLocal ? '/color-palette-generator.html' : '/apps/color-palette-generator';
+            document.getElementById('ns-target').textContent = target;
+        })();
+    </script>
 </noscript>
 </body>
 </html>

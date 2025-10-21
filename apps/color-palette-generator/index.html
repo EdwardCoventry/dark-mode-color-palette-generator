@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dev Redirect: Color Palette Generator</title>
+  <meta name="robots" content="noindex, nofollow">
+  <script>
+    (function(){
+      try {
+        var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
+        if (isLocal) {
+          // In Vite dev, serve the actual HTML entry
+          window.location.replace('/color-palette-generator.html' + (window.location.search||'') + (window.location.hash||''));
+        }
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+  <noscript>
+    <p>Open <a href="/color-palette-generator.html">/color-palette-generator.html</a> when running locally.</p>
+  </noscript>
+</body>
+</html>
+
