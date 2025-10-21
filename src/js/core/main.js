@@ -1,4 +1,4 @@
-import { BLACK_TO_BLACK, hexFromName, nameFromHex } from '../palette/black-palette-name-pool.js';
+import { SHADES_OF_BLACK, hexFromName, nameFromHex } from '../palette/black-palette-name-pool.js';
 
 /* ----- helpers ------------------------------------------------------- */
 function randomShade () {
@@ -68,7 +68,7 @@ function buildUniqueHexes (needed, excludeHexes = new Set(), usage = {}, bias = 
   // 1) Build candidate list from NAME_DICT, dedup by resulting hex
   const candidateSet = new Set();
   const candidates = [];
-  for (const name of Object.keys(BLACK_TO_BLACK)) {
+  for (const name of Object.keys(SHADES_OF_BLACK)) {
     const hex = hexFromName(name)?.toUpperCase();
     if (!hex) continue;
     if (used.has(hex)) continue;           // avoid anything already used/excluded

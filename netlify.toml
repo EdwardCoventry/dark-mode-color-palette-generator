@@ -3,6 +3,30 @@ command = "npm run build"
 publish = "dist"
 
 # ---- apps variant ----
+
+# Redirect the legacy HTML path under /apps to site root
+[[redirects]]
+from = "/apps/color-palette-generator.html"
+to   = "/"
+status = 301
+
+# Serve the palette UI for pretty /apps path
+[[redirects]]
+from = "/apps/color-palette-generator"
+to   = "/color-palette-generator.html"
+status = 200
+
+[[redirects]]
+from = "/apps/color-palette-generator/assets/*"
+to   = "/assets/:splat"
+status = 200
+
+[[redirects]]
+from = "/apps/color-palette-generator/*"
+to   = "/color-palette-generator.html"
+status = 200
+
+# Keep dark-mode alias (if needed)
 [[redirects]]
 from = "/apps/dark-mode-color-palette-generator"
 to   = "/index.html"
@@ -15,21 +39,6 @@ status = 200
 
 [[redirects]]
 from = "/apps/dark-mode-color-palette-generator/*"
-to   = "/index.html"
-status = 200
-
-[[redirects]]
-from = "/apps/color-palette-generator"
-to   = "/index.html"
-status = 200
-
-[[redirects]]
-from = "/apps/color-palette-generator/assets/*"
-to   = "/assets/:splat"
-status = 200
-
-[[redirects]]
-from = "/apps/color-palette-generator/*"
 to   = "/index.html"
 status = 200
 

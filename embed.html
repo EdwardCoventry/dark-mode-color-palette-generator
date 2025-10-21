@@ -3,27 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="robots" content="noindex, nofollow">
-    <meta http-equiv="refresh" content="0; url=/color-palette-generator.html?embed=1">
+    <meta http-equiv="refresh" content="0; url=/apps/color-palette-generator?embed=1">
     <meta name="color-scheme" content="light dark"/>
     <meta name="darkreader-lock"/>
     <title>Embed: color-palette-generator</title>
     <script>
         (function () {
             try {
-                var target = '/color-palette-generator.html';
+                var target = '/apps/color-palette-generator';
                 var search = window.location.search || '';
                 var qp = new URLSearchParams(search);
-                if (!qp.has('embed')) qp.append('embed', '1');
-                var next = target + (qp.toString() ? ('?' + qp.toString()) : '') + (window.location.hash || '');
-                window.location.replace(next);
-            } catch (e) { /* noop */
-            }
+                // Ensure embed mode is enabled
+                if (!qp.has('embed')) qp.set('embed', '1');
+                var qs = qp.toString();
+                var next = target + (qs ? ('?' + qs) : '') + (window.location.hash || '');
+                if ((window.location.pathname + window.location.search + window.location.hash) !== next) {
+                    window.location.replace(next);
+                }
+            } catch (e) { /* noop */ }
         })();
     </script>
 </head>
 <body>
 <noscript>
-    <p>Redirecting to <a href="/color-palette-generator.html?embed=1">/color-palette-generator.html?embed=1</a>…</p>
+    <p>Redirecting to <a href="/apps/color-palette-generator?embed=1">/apps/color-palette-generator?embed=1</a>…</p>
 </noscript>
 </body>
 </html>

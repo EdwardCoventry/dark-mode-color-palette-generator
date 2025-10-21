@@ -1,12 +1,12 @@
 // Convert a dictionary value (two-digit hex) to full 6-digit grayscale hex, e.g., '0A' -> '#0A0A0A'
 
-import {BLACK_TO_BLACK} from "../../data/black-colors.js";
+import {SHADES_OF_BLACK} from "../../data/shades-of-black.js";
 
 // Re-export the name pool for consumers that need to iterate candidates
-export { BLACK_TO_BLACK } from "../../data/black-colors.js";
+export { SHADES_OF_BLACK } from "../../data/shades-of-black.js";
 
 export function hexFromName(name) {
-  const v = BLACK_TO_BLACK[name];
+  const v = SHADES_OF_BLACK[name];
   if (!v) return null;
   const comp = String(v).replace('#', '').toUpperCase().padStart(2, '0').slice(0, 2);
   return `#${comp}${comp}${comp}`;
@@ -23,7 +23,7 @@ export function nameFromHex(hex) {
   if (rr !== gg || rr !== bb) return null; // not a grayscale hex
   // collect all names whose component matches RR
   const matches = [];
-  for (const [name, comp] of Object.entries(BLACK_TO_BLACK)) {
+  for (const [name, comp] of Object.entries(SHADES_OF_BLACK)) {
     if (rr === String(comp).toUpperCase().padStart(2, '0').slice(0, 2)) {
       matches.push(name);
     }

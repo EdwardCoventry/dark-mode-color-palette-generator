@@ -10,7 +10,7 @@ A tiny grayscale color palette generator built with Vite.
   - `styles.css` — shared styles
   - `js/`
     - `pages/color-palette-generator.js` — palette page logic
-    - `data/black-colors.js` — grayscale names → hex component + helpers
+    - `data/shades-of-black.js` — grayscale names → hex component + helpers
     - `components/header.js` — <site-header> web component
     - `components/footer.js` — <site-footer> web component
     - `core/main.js` — (not used in production; no longer referenced)
