@@ -8,6 +8,19 @@
   <style>
     /* ------- layout ------- */
     body {display:flex; flex-direction:column; min-height:100dvh;}
+
+    /* Remove blue/ink tap highlights on mobile across interactive elements */
+    :root, body, button, a, .lock-btn, #generateBtn, .color-col, .container {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Show outlines only for keyboard users; remove default focus rings otherwise */
+    button:focus, .lock-btn:focus { outline: none; }
+
+    /* Neutral text-selection (grayscale, no saturated colors) */
+    ::selection { background: rgba(0,0,0,.18); color: inherit; }
+    ::-moz-selection { background: rgba(0,0,0,.18); color: inherit; }
+
     /* container now stretches fully between header & footer */
     .container{flex:1 1 auto; display:flex; flex-direction:column; padding:0; gap:0; min-height:0; position:relative; align-items:stretch; max-width:100vw;}
     .controls{position:absolute; top:0.9rem; left:50%; transform:translateX(-50%); z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:.85rem; padding:0; pointer-events:none;}
@@ -61,7 +74,7 @@
     }
     .lock-btn:hover{background:rgba(255,255,255,.15)}
     .color-col[data-locked="true"] .lock-btn{background:rgba(255,255,255,.95); color:#000; border-color:transparent}
-    .lock-btn:focus{outline:2px solid rgba(255,255,255,.6); outline-offset:2px}
+    .lock-btn:focus-visible{outline:2px solid rgba(255,255,255,.6); outline-offset:2px}
 
     /* ------- generate button ------- */
     #generateBtn{
