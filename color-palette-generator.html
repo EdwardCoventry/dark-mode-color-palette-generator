@@ -9,6 +9,30 @@
     /* ------- layout ------- */
     body {display:flex; flex-direction:column; min-height:100dvh;}
 
+    /* Robustly prevent page scrollbars even when users zoom */
+    html.palette-page, html.palette-page body {
+      margin: 0;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;           /* fallback */
+      overflow: clip;             /* modern: avoids scrollbars entirely */
+      overscroll-behavior: none;  /* no bounce/scroll chaining */
+      scrollbar-width: none;      /* Firefox: hide scrollbar track */
+      -webkit-overflow-scrolling: auto;
+    }
+    html.palette-page::-webkit-scrollbar,
+    html.palette-page body::-webkit-scrollbar { display: none; }
+
+    /* Ensure inner layout never creates overflow */
+    .palette-page .container { max-height: 100%; overflow: hidden; }
+    .palette-page .color-columns { overflow: hidden; }
+    .palette-page .color-col { min-width: 0; }
+
+    /* Prevent long text from causing horizontal scroll */
+    .palette-page .color-col .info { max-width: 100%; }
+    .palette-page .color-col .info .name,
+    .palette-page .color-col .info .hex { overflow-wrap: anywhere; word-break: break-word; }
+
     /* Remove blue/ink tap highlights on mobile across interactive elements */
     :root, body, button, a, .lock-btn, #generateBtn, .color-col, .container {
       -webkit-tap-highlight-color: transparent;

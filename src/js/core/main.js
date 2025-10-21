@@ -1,6 +1,9 @@
 import { SHADES_OF_BLACK, hexFromName, nameFromHex } from '../palette/black-palette-name-pool.js';
 
 /* ----- helpers ------------------------------------------------------- */
+// History behavior: 'push' creates entries for each generation; 'replace' keeps a single entry so Back leaves the page
+let HISTORY_MODE = 'push'; // will be set in init() based on embed/flags
+
 function randomShade () {
   // Bias toward darker: square the RNG, cap to 0–63 (quarter range)
   const v   = Math.floor(Math.pow(Math.random(), 2) * 64);
@@ -119,7 +122,24 @@ function setColumnShade (col, hex, setName = true, name = null) {
 
 function updateHashFromDOM () {
   const shades = columns().map(c => (c.dataset.shade || '#000000').slice(1));
-  location.hash = shades.join('-');
+  const nextHash = shades.join('-');
+  // Avoid churn if hash is unchanged
+  const currentHash = (location.hash || '').replace(/^#/, '');
+  if (currentHash === nextHash) return;
+
+  // Build next URL preserving path/query
+  const url = new URL(location.href);
+  url.hash = nextHash;
+  try {
+    if (HISTORY_MODE === 'replace') {
+      history.replaceState(history.state, '', url.toString());
+    } else {
+      history.pushState(history.state, '', url.toString());
+    }
+  } catch {
+    // Fallback to traditional assignment if history API fails
+    location.hash = nextHash;
+  }
 }
 
 function parseHash () {
@@ -322,6 +342,12 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
     const parts = parseHash();
     if (parts) applyShades(parts, false);
   });
+
+  // Also react to popstate (when history.pushState/replaceState is used)
+  window.addEventListener('popstate', () => {
+    const parts = parseHash();
+    if (parts) applyShades(parts, false);
+  });
 }
 
 function init () {
@@ -331,8 +357,14 @@ function init () {
   const inFrame = (() => { try { return window.self !== window.top; } catch { return true; } })();
   const embedded = inFrame || embedFlag;
 
-  // Optionally allow keyboard shortcuts even when embedded with ?keys=1
-  const allowKeyboard = !embedded || (qp.get('keys') === '1' || qp.get('keyboard') === '1');
+  // Determine history mode. Defaults: embedded -> replace (Back leaves page), direct -> push (Back cycles palettes)
+  const histRaw = (qp.get('history') || qp.get('hist') || '').toLowerCase();
+  if (histRaw) {
+    if (['replace', 'r', '0', 'false', 'off'].includes(histRaw)) HISTORY_MODE = 'replace';
+    else if (['push', 'p', '1', 'true', 'on'].includes(histRaw)) HISTORY_MODE = 'push';
+  } else {
+    HISTORY_MODE = embedded ? 'replace' : 'push';
+  }
 
   // Tag root element to enable CSS overrides when embedded
   const root = document.documentElement;
