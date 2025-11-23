@@ -183,7 +183,20 @@ function setColumnShade (col, hex, setName = true, name = null) {
   const info = col.querySelector('.info');
   col.style.background = hex;
   col.dataset.shade = hex;
-  info.querySelector('.hex').textContent = hex;
+  // Decide whether to display leading # based on embedded + mobile heuristic
+  const embedded = document.documentElement.classList.contains('embedded');
+  const mobileLike = (() => {
+    try {
+      if (window.matchMedia) {
+        if (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(hover: none)').matches) return true;
+      }
+    } catch { /* noop */ }
+    // Fallback viewport heuristic
+    return window.innerWidth <= 700;
+  })();
+  const showHash = !(embedded && mobileLike);
+  const displayHex = showHash ? hex : hex.replace(/^#/, '');
+  info.querySelector('.hex').textContent = displayHex;
   if (setName) {
     info.querySelector('.name').textContent = name ?? nameFromHex(hex) ?? '';
   }
@@ -307,7 +320,8 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
       if (e.target.closest && e.target.closest('.lock-btn')) return;
       const hexEl = col.querySelector('.hex');
       const nameEl = col.querySelector('.name');
-      const hex = hexEl.textContent;
+      // Always copy the full hex including # from dataset, regardless of visual presentation
+      const hex = col.dataset.shade || hexEl.textContent;
 
       // Detect coarse pointer/touch (mobile)
       const mqlCoarse = window.matchMedia ? (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(hover: none)').matches) : ('ontouchstart' in window);
