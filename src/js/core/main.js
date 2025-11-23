@@ -197,19 +197,6 @@ function setColumnShade (col, hex, setName = true, name = null) {
   const showHash = !(embedded && mobileLike);
   const displayHex = showHash ? hex : hex.replace(/^#/, '');
   info.querySelector('.hex').textContent = displayHex;
-  if (setName) {
-    info.querySelector('.name').textContent = name ?? nameFromHex(hex) ?? '';
-  }
-  applyContrastStyles(col, hex);
-}
-
-function updateHashFromDOM () {
-  const shades = columns().map(c => (c.dataset.shade || '#000000').slice(1));
-  const nextHash = shades.join('-');
-  // Avoid churn if hash is unchanged
-  const currentHash = (location.hash || '').replace(/^#/, '');
-  if (currentHash === nextHash) return;
-
   // Build next URL preserving path/query
   const url = new URL(location.href);
   url.hash = nextHash;
@@ -320,8 +307,7 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
       if (e.target.closest && e.target.closest('.lock-btn')) return;
       const hexEl = col.querySelector('.hex');
       const nameEl = col.querySelector('.name');
-      // Always copy the full hex including # from dataset, regardless of visual presentation
-      const hex = col.dataset.shade || hexEl.textContent;
+      const hex = hexEl.textContent;
 
       // Detect coarse pointer/touch (mobile)
       const mqlCoarse = window.matchMedia ? (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(hover: none)').matches) : ('ontouchstart' in window);
@@ -334,8 +320,8 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
       const existingHint = col.querySelector('.copied-hint');
       if (existingHint) existingHint.remove();
 
-      try {
-        await copyToClipboard(hex);
+      // Always copy the full hex including # from dataset, regardless of visual presentation
+      const hex = col.dataset.shade || hexEl.textContent;
         if (mqlCoarse) {
           // Mobile: show hint below the title instead of replacing it
           const hint = document.createElement('div');

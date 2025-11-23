@@ -106,18 +106,6 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* Lock button now sits inside the overlay stack */
-.lock-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.1rem;
-  height: 2.1rem;
-  border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, .85);
-  background: transparent;
-  color: #fff;
   cursor: pointer;
   transition: .2s ease;
   pointer-events: auto;
@@ -145,14 +133,4 @@ body {
 /* --- mobile tweaks: increase spacing between lock / hex / name --- */
 @media (max-width: 700px), (hover: none), (pointer: coarse) {
   .color-col .info { inset: clamp(0.9rem, 3.5vh, 1.6rem) 0 auto 0; gap: .65rem; }
-  .embedded .color-col .hex {
-    font-weight: 800; /* heaviest available typical system weight */
-    letter-spacing: .5px; /* minor expansion for readability without size increase */
-    font-stretch: condensed; /* attempt to condense if font supports */
-  }
-  .embedded .color-col .name {
-    font-weight: 600;
-    font-stretch: condensed;
-    line-height: 1.15; /* slightly tighter */
-  }
 }
