@@ -92,6 +92,7 @@ body {
   padding: 0 .35rem;
 }
 
+/* Hex: single line, will be auto-shrunk via JS if needed */
 .color-col .hex {
   opacity: .95;
   white-space: nowrap;
@@ -99,18 +100,34 @@ body {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 700;
 }
+
+/* Name: allow wrapping across multiple lines */
 .color-col .name {
-  opacity: .8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  opacity: .85;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
+  max-width: 100%;
 }
+
+/* Lock button (reconstructed) */
+.lock-btn {
+  background: rgba(255,255,255,.12);
+  color: #FFF;
+  border: 1px solid rgba(255,255,255,.55);
+  padding: .40rem .7rem;
+  font-size: .7rem;
+  font-weight: 600;
+  border-radius: .65rem;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   cursor: pointer;
   transition: .2s ease;
   pointer-events: auto;
 }
-
 .lock-btn:hover { background: rgba(255, 255, 255, .15); }
 .color-col[data-locked="true"] .lock-btn {
   background: rgba(255, 255, 255, .95);
@@ -130,7 +147,17 @@ body {
 .palette-page.embedded .kbd-hint { display: none; }
 @media (hover: none), (pointer: coarse) { .palette-page .kbd-hint { display: none; } }
 
-/* --- mobile tweaks: increase spacing between lock / hex / name --- */
+/* --- mobile tweaks: increase spacing & adjust typography --- */
 @media (max-width: 700px), (hover: none), (pointer: coarse) {
   .color-col .info { inset: clamp(0.9rem, 3.5vh, 1.6rem) 0 auto 0; gap: .65rem; }
+  .color-col .hex { font-weight: 800; letter-spacing: -0.5px; }
+  .color-col .name { line-height: 1.25; font-stretch: condensed; letter-spacing: -0.25px; }
 }
+
+/* Embedded + mobile: emphasize hex weight */
+@media (max-width:700px) {
+  .palette-page.embedded .color-col .hex { font-weight: 900; }
+}
+
+/* Copied hint */
+.copied-hint { font-size: .65rem; font-weight: 600; opacity: .95; }

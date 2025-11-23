@@ -179,11 +179,10 @@ function broadcastStateToParent({ embedded }) {
   try { window.parent.postMessage(payload, '*'); } catch { /* noop */ }
 }
 
-function setColumnShade (col, hex, setName = true, name = null) {
+function setColumnShade (col, hex, name = null) {
   const info = col.querySelector('.info');
   col.style.background = hex;
   col.dataset.shade = hex;
-  // Decide whether to display leading # based on embedded + mobile heuristic
   const embedded = document.documentElement.classList.contains('embedded');
   const mobileLike = (() => {
     try {
@@ -191,23 +190,44 @@ function setColumnShade (col, hex, setName = true, name = null) {
         if (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(hover: none)').matches) return true;
       }
     } catch { /* noop */ }
-    // Fallback viewport heuristic
     return window.innerWidth <= 700;
   })();
   const showHash = !(embedded && mobileLike);
   const displayHex = showHash ? hex : hex.replace(/^#/, '');
-  info.querySelector('.hex').textContent = displayHex;
-  // Build next URL preserving path/query
-  const url = new URL(location.href);
-  url.hash = nextHash;
+  const hexEl = info.querySelector('.hex');
+  hexEl.textContent = displayHex;
+  const nameEl = info.querySelector('.name');
+  const resolved = name || nameFromHex(hex) || '';
+  nameEl.textContent = resolved;
+  adaptSingleLine(hexEl);
+  applyContrastStyles(col, hex);
+}
+
+function adaptSingleLine(el, { minScale = 0.75 } = {}) {
+  if (!el) return;
+  el.style.removeProperty('font-size');
+  const parentWidth = el.parentElement ? el.parentElement.clientWidth : el.clientWidth;
+  const maxWidth = parentWidth - 8; // padding allowance
+  let scale = 1.0;
+  const originalSize = parseFloat(getComputedStyle(el).fontSize) || 16;
+  while (el.scrollWidth > maxWidth && scale > minScale) {
+    scale -= 0.05;
+    el.style.fontSize = (originalSize * scale) + 'px';
+  }
+}
+
+function updateHashFromDOM() {
+  const nextHash = currentHashString();
+  if (!nextHash) return;
   try {
+    const url = new URL(location.href);
+    url.hash = nextHash;
     if (HISTORY_MODE === 'replace') {
       history.replaceState(history.state, '', url.toString());
     } else {
       history.pushState(history.state, '', url.toString());
     }
   } catch {
-    // Fallback to traditional assignment if history API fails
     location.hash = nextHash;
   }
 }
@@ -226,11 +246,11 @@ function applyShades (shades, overwriteLocked = false) {
     const col = cols[i];
     const locked = col.dataset.locked === 'true';
     if (locked && !overwriteLocked) continue;
-    setColumnShade(col, shades[i], true);
+    setColumnShade(col, shades[i]);
   }
   updateHashFromDOM();
-  // Notify parent (when embedded) so hosts can sync their Open button
   broadcastStateToParent({ embedded: document.documentElement.classList.contains('embedded') });
+  reflowHexLabels();
 }
 
 function toggleLock (col) {
@@ -264,26 +284,29 @@ function copyToClipboard (text) {
 
 function generate ({respectLocks = true} = {}) {
   const cols = columns();
-
-  // Determine targets and exclusion set
   const targets = respectLocks ? cols.filter(c => c.dataset.locked !== 'true') : cols;
   const exclude = new Set();
   if (respectLocks) {
     cols.forEach(c => { if (c.dataset.locked === 'true' && c.dataset.shade) exclude.add(String(c.dataset.shade).toUpperCase()); });
   }
-
   const toFill = targets.length;
   const newHexes = buildUniqueHexes(toFill, exclude, sessionUsage, 1.0);
-
   let idx = 0;
   targets.forEach(col => {
     const hex = newHexes[idx++];
     const resolvedName = nameFromHex(hex) ?? '';
-    setColumnShade(col, hex, true, resolvedName);
+    setColumnShade(col, hex, resolvedName);
     bumpUsage(sessionUsage, hex, 1);
   });
-
   updateHashFromDOM();
+  reflowHexLabels();
+}
+
+function reflowHexLabels() {
+  columns().forEach(col => {
+    const hexEl = col.querySelector('.hex');
+    adaptSingleLine(hexEl);
+  });
 }
 
 function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
@@ -307,41 +330,26 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
       if (e.target.closest && e.target.closest('.lock-btn')) return;
       const hexEl = col.querySelector('.hex');
       const nameEl = col.querySelector('.name');
-      const hex = hexEl.textContent;
-
-      // Detect coarse pointer/touch (mobile)
+      const fullHex = col.dataset.shade || hexEl.textContent;
       const mqlCoarse = window.matchMedia ? (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(hover: none)').matches) : ('ontouchstart' in window);
-
-      // Ensure previous mobile hint is cleared if present
-      if (col._copiedHintTimeout) {
-        clearTimeout(col._copiedHintTimeout);
-        col._copiedHintTimeout = null;
-      }
+      // Cleanup prior hints
+      if (col._copiedHintTimeout) { clearTimeout(col._copiedHintTimeout); col._copiedHintTimeout = null; }
       const existingHint = col.querySelector('.copied-hint');
       if (existingHint) existingHint.remove();
-
-      // Always copy the full hex including # from dataset, regardless of visual presentation
-      const hex = col.dataset.shade || hexEl.textContent;
+      try {
+        await copyToClipboard(fullHex);
         if (mqlCoarse) {
-          // Mobile: show hint below the title instead of replacing it
           const hint = document.createElement('div');
           hint.className = 'copied-hint';
           hint.textContent = 'Copied!';
           nameEl.insertAdjacentElement('afterend', hint);
-          col._copiedHintTimeout = setTimeout(() => {
-            hint.remove();
-            col._copiedHintTimeout = null;
-          }, 1000);
+          col._copiedHintTimeout = setTimeout(() => { hint.remove(); col._copiedHintTimeout = null; }, 1000);
         } else {
-          // Desktop: temporarily replace the title
-          if (col._nameRevertTimeout) {
-            clearTimeout(col._nameRevertTimeout);
-            col._nameRevertTimeout = null;
-          }
+          if (col._nameRevertTimeout) { clearTimeout(col._nameRevertTimeout); col._nameRevertTimeout = null; }
+          const originalName = nameEl.textContent;
           nameEl.textContent = 'Copied!';
           col._nameRevertTimeout = setTimeout(() => {
-            const currentHex = col.dataset.shade || '';
-            nameEl.textContent = nameFromHex(currentHex) || '';
+            nameEl.textContent = originalName;
             col._nameRevertTimeout = null;
           }, 800);
         }
@@ -351,21 +359,12 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
           hint.className = 'copied-hint';
           hint.textContent = 'Copy failed';
           nameEl.insertAdjacentElement('afterend', hint);
-          col._copiedHintTimeout = setTimeout(() => {
-            hint.remove();
-            col._copiedHintTimeout = null;
-          }, 1200);
+          col._copiedHintTimeout = setTimeout(() => { hint.remove(); col._copiedHintTimeout = null; }, 1200);
         } else {
-          if (col._nameRevertTimeout) {
-            clearTimeout(col._nameRevertTimeout);
-            col._nameRevertTimeout = null;
-          }
+          if (col._nameRevertTimeout) { clearTimeout(col._nameRevertTimeout); col._nameRevertTimeout = null; }
+          const originalName = nameEl.textContent;
           nameEl.textContent = 'Copy failed';
-          col._nameRevertTimeout = setTimeout(() => {
-            const currentHex = col.dataset.shade || '';
-            nameEl.textContent = nameFromHex(currentHex) || '';
-            col._nameRevertTimeout = null;
-          }, 1000);
+          col._nameRevertTimeout = setTimeout(() => { nameEl.textContent = originalName; col._nameRevertTimeout = null; }, 1000);
         }
       }
     });
@@ -520,6 +519,7 @@ function init () {
 
   // Ensure initial contrast styles are applied
   columns().forEach(col => applyContrastStyles(col, col.dataset.shade || '#000000'));
+  reflowHexLabels();
 
   // Expose a tiny helper on window for host pages or dev tools
   try { window.PaletteLinkManager = { buildOpenUrlWithState }; } catch { /* noop */ }
