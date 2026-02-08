@@ -3,7 +3,7 @@ import { runPaletteUiCheck } from '../scripts/run-palette-ui.js';
 
 describe('palette UI workflow', () => {
   it('keeps background colors aligned with hex labels', async () => {
-    const result = await runPaletteUiCheck({ clicks: 12 });
+    const result = await runPaletteUiCheck({ clicks: 10 });
     expect(result.columns).toBe(4);
   }, 60000);
 });

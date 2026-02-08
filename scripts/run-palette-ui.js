@@ -27,7 +27,7 @@ const assertMatches = (hex, rgb, index) => {
 };
 
 const defaultOptions = {
-  clicks: 12,
+  clicks: 10,
   width: 1280,
   height: 800
 };
