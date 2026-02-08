@@ -181,7 +181,8 @@ function broadcastStateToParent({ embedded }) {
 
 function setColumnShade (col, hex, name = null) {
   const info = col.querySelector('.info');
-  col.style.background = hex;
+  col.style.backgroundColor = hex;
+  col.style.backgroundImage = 'none';
   col.dataset.shade = hex;
   const embedded = document.documentElement.classList.contains('embedded');
   const mobileLike = (() => {
@@ -193,7 +194,8 @@ function setColumnShade (col, hex, name = null) {
     return window.innerWidth <= 700;
   })();
   const showHash = !(embedded && mobileLike);
-  const displayHex = showHash ? hex : hex.replace(/^#/, '');
+  const compactHex = hex.replace(/^#/, '').slice(0, 2);
+  const displayHex = showHash ? hex : `#${compactHex}`;
   const hexEl = info.querySelector('.hex');
   hexEl.textContent = displayHex;
   const nameEl = info.querySelector('.name');
