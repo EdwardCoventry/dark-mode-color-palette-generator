@@ -77,6 +77,18 @@ describe('palette generator', () => {
     });
   });
 
+  it('stacks hex on mobile when not embedded', async () => {
+    await loadApp({ width: 600 });
+    const hexEl = document.querySelector('.color-col .hex');
+    expect(hexEl?.classList.contains('hex-stacked')).toBe(true);
+    const lines = [...(hexEl?.querySelectorAll('.hex-line') || [])];
+    expect(lines).toHaveLength(3);
+    lines.forEach((line) => {
+      expect(line.textContent).toMatch(/^[0-9A-F]{2}$/);
+    });
+    expect(hexEl?.querySelector('.hex-line--first')).not.toBeNull();
+  });
+
   it('uses compact hex with # when embedded and small', async () => {
     await loadApp({ embedded: true, width: 600 });
     const hexText = document.querySelector('.color-col .hex')?.textContent || '';

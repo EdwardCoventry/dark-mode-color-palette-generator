@@ -158,8 +158,39 @@ body {
 
 /* --- mobile tweaks: increase spacing & adjust typography --- */
 @media (max-width: 700px), (hover: none), (pointer: coarse) {
-  .color-col .info { inset: clamp(0.9rem, 3.5vh, 1.6rem) 0 auto 0; gap: .65rem; }
+  .color-col .info { inset: clamp(0.9rem, 3.5vh, 1.6rem) 0 auto 0; gap: clamp(1.2rem, 4vh, 2.4rem); }
   .color-col .hex { font-weight: 800; letter-spacing: -0.5px; }
+  .palette-page:not(.embedded) .color-col .hex {
+    font-size: clamp(1.5rem, 6.5vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: .08em;
+    white-space: pre;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.05;
+    align-self: stretch;
+    text-align: center;
+  }
+  .palette-page:not(.embedded) .color-col .hex.hex-stacked {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .palette-page:not(.embedded) .color-col .hex.hex-stacked .hex-line {
+    display: inline-flex;
+    align-items: center;
+  }
+  .palette-page:not(.embedded) .color-col .hex.hex-stacked .hex-line::before,
+  .palette-page:not(.embedded) .color-col .hex.hex-stacked .hex-line::after {
+    content: '#';
+    visibility: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+  }
+  .palette-page:not(.embedded) .color-col .hex.hex-stacked .hex-line--first::before {
+    visibility: visible;
+  }
   .color-col .name { line-height: 1.25; font-stretch: condensed; letter-spacing: -0.25px; }
 }
 

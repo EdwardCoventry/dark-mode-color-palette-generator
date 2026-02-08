@@ -139,6 +139,37 @@ function columns () {
   return [...document.querySelectorAll('.color-col')];
 }
 
+function isMobileLikeViewport () {
+  try {
+    if (window.matchMedia) {
+      if (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(hover: none)').matches) return true;
+    }
+  } catch { /* noop */ }
+  return window.innerWidth <= 700;
+}
+
+function stackHexForDisplay (hex) {
+  const norm = normalizeHex6(hex);
+  if (!norm) return null;
+  const raw = norm.slice(1);
+  return [raw.slice(0, 2), raw.slice(2, 4), raw.slice(4, 6)];
+}
+
+function renderStackedHex (hexEl, hex) {
+  const parts = stackHexForDisplay(hex);
+  if (!parts || !hexEl) {
+    if (hexEl) hexEl.textContent = String(hex || '');
+    return;
+  }
+  const lines = parts.map((part, idx) => {
+    const line = document.createElement('span');
+    line.className = idx === 0 ? 'hex-line hex-line--first' : 'hex-line';
+    line.textContent = part;
+    return line;
+  });
+  hexEl.replaceChildren(...lines);
+}
+
 function currentShadesHexList () {
   return columns().map(c => (c.dataset.shade || '#000000').toUpperCase());
 }
@@ -185,23 +216,29 @@ function setColumnShade (col, hex, name = null) {
   col.style.backgroundImage = 'none';
   col.dataset.shade = hex;
   const embedded = document.documentElement.classList.contains('embedded');
-  const mobileLike = (() => {
-    try {
-      if (window.matchMedia) {
-        if (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(hover: none)').matches) return true;
-      }
-    } catch { /* noop */ }
-    return window.innerWidth <= 700;
-  })();
-  const showHash = !(embedded && mobileLike);
+  const mobileLike = isMobileLikeViewport();
   const compactHex = hex.replace(/^#/, '').slice(0, 2);
-  const displayHex = showHash ? hex : `#${compactHex}`;
+  const stackHex = mobileLike && !embedded;
+  let displayHex = hex;
+  if (embedded && mobileLike) {
+    displayHex = `#${compactHex}`;
+  }
   const hexEl = info.querySelector('.hex');
-  hexEl.textContent = displayHex;
+  if (stackHex) {
+    hexEl.classList.add('hex-stacked');
+    renderStackedHex(hexEl, hex);
+  } else {
+    hexEl.classList.remove('hex-stacked');
+    hexEl.textContent = displayHex;
+  }
   const nameEl = info.querySelector('.name');
   const resolved = name || nameFromHex(hex) || '';
   nameEl.textContent = resolved;
-  adaptSingleLine(hexEl);
+  if (stackHex) {
+    hexEl.style.removeProperty('font-size');
+  } else {
+    adaptSingleLine(hexEl);
+  }
   applyContrastStyles(col, hex);
 }
 
@@ -305,8 +342,15 @@ function generate ({respectLocks = true} = {}) {
 }
 
 function reflowHexLabels() {
+  const embedded = document.documentElement.classList.contains('embedded');
+  const stackHex = isMobileLikeViewport() && !embedded;
   columns().forEach(col => {
     const hexEl = col.querySelector('.hex');
+    if (!hexEl) return;
+    if (stackHex) {
+      hexEl.style.removeProperty('font-size');
+      return;
+    }
     adaptSingleLine(hexEl);
   });
 }
