@@ -1,12 +1,51 @@
 <!DOCTYPE html>
 <html lang="en" class="palette-page">
 <head>
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta name="color-scheme" content="dark light">
   <meta name="darkreader" content="uuid">
   <meta name="darkreader-lock">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Generate dark-mode-friendly color palettes with lockable columns and quick copy controls.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://dark-mode-color-palette-generator.netlify.app/apps/color-palette-generator">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Color Palette Generator">
+  <meta property="og:description" content="Generate dark-mode-friendly color palettes with lockable columns and quick copy controls.">
+  <meta property="og:url" content="https://dark-mode-color-palette-generator.netlify.app/apps/color-palette-generator">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Color Palette Generator">
+  <meta name="twitter:description" content="Generate dark-mode-friendly color palettes with lockable columns and quick copy controls.">
   <title>Palette Generator</title>
+  <script>
+    (function () {
+      try {
+        var host = (window.location.hostname || "").toLowerCase();
+        var isCanonicalHost = host === "dark-mode-color-palette-generator.netlify.app";
+        if (isCanonicalHost) return;
+        var robots = document.querySelector('meta[name="robots"]');
+        if (!robots) {
+          robots = document.createElement("meta");
+          robots.setAttribute("name", "robots");
+          document.head.appendChild(robots);
+        }
+        robots.setAttribute("content", "noindex, nofollow");
+      } catch (e) {
+        console.error("Failed to set robots metadata", e);
+      }
+    })();
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Color Palette Generator",
+      "url": "https://dark-mode-color-palette-generator.netlify.app/apps/color-palette-generator",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Web",
+      "description": "Generate dark-mode-friendly color palettes with lockable columns and quick copy controls."
+    }
+  </script>
   <link rel="stylesheet" href="./src/styles.css">
   <style>
     /* ------- layout ------- */

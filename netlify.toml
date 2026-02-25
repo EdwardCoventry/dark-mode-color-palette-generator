@@ -53,3 +53,18 @@ status = 200
 from = "/embed/color-palette-generator/*"
 to   = "/embed.html"
 status = 200
+
+[[headers]]
+from = "/embed"
+[headers.values]
+X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+from = "/embed/*"
+[headers.values]
+X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+from = "/index.html"
+[headers.values]
+X-Robots-Tag = "noindex, nofollow"

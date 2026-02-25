@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /embed
+Disallow: /embed/
+Allow: /
+
+Sitemap: https://dark-mode-color-palette-generator.netlify.app/sitemap.xml
