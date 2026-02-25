@@ -55,16 +55,16 @@ to   = "/embed.html"
 status = 200
 
 [[headers]]
-from = "/embed"
+for = "/embed"
 [headers.values]
 X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
-from = "/embed/*"
+for = "/embed/*"
 [headers.values]
 X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
-from = "/index.html"
+for = "/index.html"
 [headers.values]
 X-Robots-Tag = "noindex, nofollow"
