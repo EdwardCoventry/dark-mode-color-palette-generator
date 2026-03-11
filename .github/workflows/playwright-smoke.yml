@@ -1,0 +1,59 @@
+name: Playwright Smoke
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    if: ${{ vars.PLAYWRIGHT_SMOKE_REPO != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout app
+        uses: actions/checkout@v4
+        with:
+          path: app
+
+      - name: Checkout shared smoke runner
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.PLAYWRIGHT_SMOKE_REPO }}
+          path: shared-smoke
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            app/package-lock.json
+            shared-smoke/package-lock.json
+
+      - name: Install app dependencies
+        working-directory: app
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Install shared smoke dependencies
+        working-directory: shared-smoke
+        run: npm ci
+
+      - name: Run Playwright smoke
+        working-directory: shared-smoke
+        run: npm run smoke -- --app dark-mode-color-palette-generator --build --cwd "${{ github.workspace }}/app" --artifacts-dir "${{ github.workspace }}/artifacts"
+
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-smoke-dark-mode-color-palette-generator
+          path: artifacts
+          if-no-files-found: ignore
+
+  smoke-not-configured:
+    if: ${{ vars.PLAYWRIGHT_SMOKE_REPO == '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Missing shared smoke repo variable
+        run: echo "::notice::Set the PLAYWRIGHT_SMOKE_REPO repository variable to enable shared Playwright smoke CI."
