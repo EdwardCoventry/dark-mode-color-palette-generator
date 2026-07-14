@@ -1,0 +1,215 @@
+{
+  "appId": "dark-mode-color-palette-generator",
+  "appName": "dark-mode-color-palette-generator",
+  "generatedAt": "2026-07-14T11:26:32.981Z",
+  "purpose": "Palette design tool for generating dark-mode-friendly color systems, locking columns, and copying color values.",
+  "keyFiles": [
+    "color-palette-generator.html",
+    "embed.html",
+    "package.json",
+    "index.html"
+  ],
+  "screens": [
+    {
+      "artifacts": {
+        "desktopScreenshot": "images/color-palette-generator.html-desktop.png",
+        "mobileScreenshot": "images/color-palette-generator.html-mobile.png",
+        "raw": "raw/color-palette-generator.html.json",
+        "screenDoc": "screens/color-palette-generator.html.md",
+        "states": [
+          {
+            "id": "color-palette-generator.html-desktop-lock-first-column",
+            "label": "Lock the first palette column",
+            "recipeId": "lock-first-column",
+            "resultingHeadings": [
+              "Color Palette Generator",
+              "Palette controls"
+            ],
+            "resultingTitle": "Palette Generator",
+            "resultingUrl": "http://127.0.0.1:59461/color-palette-generator.html#111111-222222-333333-444444",
+            "screenshot": "images/color-palette-generator.html-desktop-lock-first-column.png",
+            "source": "recipe",
+            "viewport": "desktop",
+            "visibleOverlays": []
+          },
+          {
+            "id": "color-palette-generator.html-mobile-lock-first-column",
+            "label": "Lock the first palette column",
+            "recipeId": "lock-first-column",
+            "resultingHeadings": [
+              "Color Palette Generator",
+              "Palette controls"
+            ],
+            "resultingTitle": "Palette Generator",
+            "resultingUrl": "http://127.0.0.1:59461/color-palette-generator.html#111111-222222-333333-444444",
+            "screenshot": "images/color-palette-generator.html-mobile-lock-first-column.png",
+            "source": "recipe",
+            "viewport": "mobile",
+            "visibleOverlays": []
+          }
+        ]
+      },
+      "captureNotes": [
+        "Documentation baseline used configured runtime URL variants: /color-palette-generator.html#111111-222222-333333-444444."
+      ],
+      "dialogsMenusPopovers": [
+        "Lock the first palette column"
+      ],
+      "id": "color-palette-generator.html",
+      "inputs": [],
+      "interactiveStates": [
+        {
+          "id": "color-palette-generator.html-desktop-lock-first-column",
+          "label": "Lock the first palette column",
+          "recipeId": "lock-first-column",
+          "resultingHeadings": [
+            "Color Palette Generator",
+            "Palette controls"
+          ],
+          "resultingTitle": "Palette Generator",
+          "resultingUrl": "http://127.0.0.1:59461/color-palette-generator.html#111111-222222-333333-444444",
+          "screenshot": "images/color-palette-generator.html-desktop-lock-first-column.png",
+          "source": "recipe",
+          "viewport": "desktop",
+          "visibleOverlays": []
+        },
+        {
+          "id": "color-palette-generator.html-mobile-lock-first-column",
+          "label": "Lock the first palette column",
+          "recipeId": "lock-first-column",
+          "resultingHeadings": [
+            "Color Palette Generator",
+            "Palette controls"
+          ],
+          "resultingTitle": "Palette Generator",
+          "resultingUrl": "http://127.0.0.1:59461/color-palette-generator.html#111111-222222-333333-444444",
+          "screenshot": "images/color-palette-generator.html-mobile-lock-first-column.png",
+          "source": "recipe",
+          "viewport": "mobile",
+          "visibleOverlays": []
+        }
+      ],
+      "primaryActions": [
+        "Generate a new color palette",
+        "Lock column 1",
+        "Copy #111111",
+        "Lock column 2",
+        "Copy #222222",
+        "Lock column 3",
+        "Copy #333333",
+        "Lock column 4",
+        "Copy #444444"
+      ],
+      "purpose": "Main palette builder with lockable columns, generated swatches, and copy-oriented controls.",
+      "route": "/color-palette-generator.html",
+      "sourceFiles": [
+        "color-palette-generator.html",
+        "embed.html",
+        "package.json",
+        "index.html"
+      ],
+      "title": "Color Palette Generator"
+    },
+    {
+      "artifacts": {
+        "desktopScreenshot": "images/embed.html-desktop.png",
+        "mobileScreenshot": "images/embed.html-mobile.png",
+        "raw": "raw/embed.html.json",
+        "screenDoc": "screens/embed.html.md",
+        "states": [
+          {
+            "id": "embed.html-desktop-lock-first-column",
+            "label": "Lock the first palette column",
+            "recipeId": "lock-first-column",
+            "resultingHeadings": [
+              "Color Palette Generator",
+              "Palette controls"
+            ],
+            "resultingTitle": "Palette Generator",
+            "resultingUrl": "http://127.0.0.1:59461/color-palette-generator.html?embed=1#111111-222222-333333-444444",
+            "screenshot": "images/embed.html-desktop-lock-first-column.png",
+            "source": "recipe",
+            "viewport": "desktop",
+            "visibleOverlays": []
+          },
+          {
+            "id": "embed.html-mobile-lock-first-column",
+            "label": "Lock the first palette column",
+            "recipeId": "lock-first-column",
+            "resultingHeadings": [
+              "Color Palette Generator",
+              "Palette controls"
+            ],
+            "resultingTitle": "Palette Generator",
+            "resultingUrl": "http://127.0.0.1:59461/color-palette-generator.html?embed=1#111111-222222-333333-444444",
+            "screenshot": "images/embed.html-mobile-lock-first-column.png",
+            "source": "recipe",
+            "viewport": "mobile",
+            "visibleOverlays": []
+          }
+        ]
+      },
+      "captureNotes": [
+        "Documentation baseline used configured runtime URL variants: /embed.html#111111-222222-333333-444444.",
+        "Documentation route resolved to runtime URL variants: /color-palette-generator.html?embed=1#111111-222222-333333-444444."
+      ],
+      "dialogsMenusPopovers": [
+        "Lock the first palette column"
+      ],
+      "id": "embed.html",
+      "inputs": [],
+      "interactiveStates": [
+        {
+          "id": "embed.html-desktop-lock-first-column",
+          "label": "Lock the first palette column",
+          "recipeId": "lock-first-column",
+          "resultingHeadings": [
+            "Color Palette Generator",
+            "Palette controls"
+          ],
+          "resultingTitle": "Palette Generator",
+          "resultingUrl": "http://127.0.0.1:59461/color-palette-generator.html?embed=1#111111-222222-333333-444444",
+          "screenshot": "images/embed.html-desktop-lock-first-column.png",
+          "source": "recipe",
+          "viewport": "desktop",
+          "visibleOverlays": []
+        },
+        {
+          "id": "embed.html-mobile-lock-first-column",
+          "label": "Lock the first palette column",
+          "recipeId": "lock-first-column",
+          "resultingHeadings": [
+            "Color Palette Generator",
+            "Palette controls"
+          ],
+          "resultingTitle": "Palette Generator",
+          "resultingUrl": "http://127.0.0.1:59461/color-palette-generator.html?embed=1#111111-222222-333333-444444",
+          "screenshot": "images/embed.html-mobile-lock-first-column.png",
+          "source": "recipe",
+          "viewport": "mobile",
+          "visibleOverlays": []
+        }
+      ],
+      "primaryActions": [
+        "Generate a new color palette",
+        "Lock column 1",
+        "Copy #111111",
+        "Lock column 2",
+        "Copy #222222",
+        "Lock column 3",
+        "Copy #333333",
+        "Lock column 4",
+        "Copy #444444"
+      ],
+      "purpose": "Embedded presentation of the palette generator for use in framed or proxied contexts.",
+      "route": "/embed.html",
+      "sourceFiles": [
+        "embed.html",
+        "color-palette-generator.html",
+        "package.json",
+        "index.html"
+      ],
+      "title": "Color Palette Generator Embed"
+    }
+  ]
+}

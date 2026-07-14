@@ -21,5 +21,10 @@ export default defineConfig({
   preview: {
     port: 5175,
     strictPort: true
+  },
+  test: {
+    // Browser suites each own a Vite server and Chromium instance; serial files
+    // are more reliable on constrained CI runners than competing instances.
+    fileParallelism: false
   }
 });

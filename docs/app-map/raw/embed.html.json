@@ -1,0 +1,164 @@
+{
+  "desktop": {
+    "accessibilitySummary": {
+      "buttons": [
+        "Generate a new color palette",
+        "Lock column 1",
+        "Copy #111111",
+        "Lock column 2",
+        "Copy #222222",
+        "Lock column 3",
+        "Copy #333333",
+        "Lock column 4",
+        "Copy #444444"
+      ],
+      "dialogs": [],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Color Palette Generator"
+        },
+        {
+          "level": 2,
+          "text": "Palette controls"
+        }
+      ],
+      "links": [
+        "Skip to content"
+      ],
+      "mainCount": 1,
+      "navigationCount": 0,
+      "statusCount": 4,
+      "textboxes": []
+    },
+    "appliedPreparations": [],
+    "baselineUrl": "http://127.0.0.1:59461/color-palette-generator.html?embed=1#111111-222222-333333-444444",
+    "bodyTextPreview": "Skip to content Color Palette Generator Palette controls Generate 🔒 #111111 Cast Iron 🔒 #222222 🔒 #333333 🔒 #444444",
+    "currentDialogs": [],
+    "forms": 0,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Color Palette Generator"
+      },
+      {
+        "level": 2,
+        "text": "Palette controls"
+      }
+    ],
+    "interactiveStates": [
+      {
+        "id": "embed.html-desktop-lock-first-column",
+        "label": "Lock the first palette column",
+        "recipeId": "lock-first-column",
+        "resultingHeadings": [
+          "Color Palette Generator",
+          "Palette controls"
+        ],
+        "resultingTitle": "Palette Generator",
+        "resultingUrl": "http://127.0.0.1:59461/color-palette-generator.html?embed=1#111111-222222-333333-444444",
+        "source": "recipe",
+        "screenshotFile": "embed.html-desktop-lock-first-column.png",
+        "visibleOverlays": []
+      }
+    ],
+    "links": [
+      {
+        "href": "#main-content",
+        "text": "Skip to content"
+      }
+    ],
+    "metaDescription": "Generate dark-mode-friendly color palettes with lockable columns and quick copy controls.",
+    "navLinks": [],
+    "paragraphs": [],
+    "roleCounts": {
+      "dialog": 0,
+      "listbox": 0,
+      "menu": 0
+    },
+    "screenshotFile": "embed.html-desktop.png",
+    "title": "Palette Generator"
+  },
+  "id": "embed.html",
+  "mobile": {
+    "accessibilitySummary": {
+      "buttons": [
+        "Generate a new color palette",
+        "Lock column 1",
+        "Copy #111111",
+        "Lock column 2",
+        "Copy #222222",
+        "Lock column 3",
+        "Copy #333333",
+        "Lock column 4",
+        "Copy #444444"
+      ],
+      "dialogs": [],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Color Palette Generator"
+        },
+        {
+          "level": 2,
+          "text": "Palette controls"
+        }
+      ],
+      "links": [
+        "Skip to content"
+      ],
+      "mainCount": 1,
+      "navigationCount": 0,
+      "statusCount": 4,
+      "textboxes": []
+    },
+    "appliedPreparations": [],
+    "baselineUrl": "http://127.0.0.1:59461/color-palette-generator.html?embed=1#111111-222222-333333-444444",
+    "bodyTextPreview": "Skip to content Color Palette Generator Palette controls Generate 🔒 #11 Cast Iron 🔒 #22 🔒 #33 🔒 #44",
+    "currentDialogs": [],
+    "forms": 0,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Color Palette Generator"
+      },
+      {
+        "level": 2,
+        "text": "Palette controls"
+      }
+    ],
+    "interactiveStates": [
+      {
+        "id": "embed.html-mobile-lock-first-column",
+        "label": "Lock the first palette column",
+        "recipeId": "lock-first-column",
+        "resultingHeadings": [
+          "Color Palette Generator",
+          "Palette controls"
+        ],
+        "resultingTitle": "Palette Generator",
+        "resultingUrl": "http://127.0.0.1:59461/color-palette-generator.html?embed=1#111111-222222-333333-444444",
+        "source": "recipe",
+        "screenshotFile": "embed.html-mobile-lock-first-column.png",
+        "visibleOverlays": []
+      }
+    ],
+    "links": [
+      {
+        "href": "#main-content",
+        "text": "Skip to content"
+      }
+    ],
+    "metaDescription": "Generate dark-mode-friendly color palettes with lockable columns and quick copy controls.",
+    "navLinks": [],
+    "paragraphs": [],
+    "roleCounts": {
+      "dialog": 0,
+      "listbox": 0,
+      "menu": 0
+    },
+    "screenshotFile": "embed.html-mobile.png",
+    "title": "Palette Generator"
+  },
+  "route": "/embed.html"
+}

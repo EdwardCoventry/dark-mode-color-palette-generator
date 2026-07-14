@@ -2,6 +2,16 @@
 command = "npm run build"
 publish = "dist"
 
+[build.environment]
+NODE_VERSION = "22"
+
+[dev]
+command = "npm run dev"
+targetPort = 5406
+port = 8806
+functionsPort = 7406
+autoLaunch = false
+
 # ---- apps variant ----
 
 # Redirect the legacy HTML path under /apps to site root

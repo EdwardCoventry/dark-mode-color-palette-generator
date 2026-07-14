@@ -11,31 +11,20 @@
     <title>Embed: color-palette-generator</title>
     <script>
         (function () {
-            try {
-                var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
-                var target = isLocal ? '/color-palette-generator.html' : '/apps/color-palette-generator';
-                var qp = new URLSearchParams(window.location.search || '');
-                if (!qp.has('embed')) qp.set('embed', '1');
-                var qs = qp.toString();
-                var next = target + (qs ? ('?' + qs) : '') + (window.location.hash || '');
-                var current = window.location.pathname + window.location.search + window.location.hash;
-                if (current !== next) {
-                    window.location.replace(next);
-                }
-            } catch (e) { /* noop */ }
+            var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
+            var target = isLocal ? '/color-palette-generator.html' : '/apps/color-palette-generator';
+            var qp = new URLSearchParams(window.location.search || '');
+            if (!qp.has('embed')) qp.set('embed', '1');
+            var qs = qp.toString();
+            var next = target + (qs ? ('?' + qs) : '') + (window.location.hash || '');
+            var current = window.location.pathname + window.location.search + window.location.hash;
+            if (current !== next) window.location.replace(next);
         })();
     </script>
 </head>
 <body>
 <noscript>
-    <p>Redirecting to <span id="ns-target">/apps/color-palette-generator?embed=1</span>…</p>
-    <script>
-        (function(){
-            var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
-            var target = (isLocal ? '/color-palette-generator.html' : '/apps/color-palette-generator') + '?embed=1';
-            document.getElementById('ns-target').textContent = target;
-        })();
-    </script>
+    <p>The embedded palette generator requires JavaScript.</p>
 </noscript>
 </body>
 </html>

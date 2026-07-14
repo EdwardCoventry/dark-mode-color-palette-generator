@@ -10,13 +10,11 @@
   <link rel="canonical" href="https://dark-mode-color-palette-generator.netlify.app/apps/color-palette-generator">
   <script>
     (function(){
-      try {
-        var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
-        if (isLocal) {
-          // In Vite dev, serve the actual HTML entry
-          window.location.replace('/color-palette-generator.html' + (window.location.search||'') + (window.location.hash||''));
-        }
-      } catch(e) {}
+      var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
+      if (isLocal) {
+        // In Vite dev, serve the actual HTML entry.
+        window.location.replace('/color-palette-generator.html' + (window.location.search||'') + (window.location.hash||''));
+      }
     })();
   </script>
 </head>

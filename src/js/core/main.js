@@ -1,51 +1,26 @@
-import { SHADES_OF_BLACK } from '../../data/shades-of-black.js';
+import {
+  SHADES_OF_BLACK,
+  compactGrayscaleLabel,
+  grayscaleComponentFromHex,
+  hexFromName,
+  nameFromHex,
+  normalizeHex6
+} from '../palette/palette-model.js';
 
 // Optional context identifier for embedded mode (supplied via ?ctx=... or ?id=...)
 let EMBED_CTX = null;
 
-// Build reverse lookup once: VV -> preferred name. Choose the first occurrence to keep names stable.
-const COMPONENT_TO_NAME = (() => {
-  const map = Object.create(null);
-  for (const [name, comp] of Object.entries(SHADES_OF_BLACK || {})) {
-    const key = String(comp || '').toUpperCase().padStart(2, '0');
-    if (!/^[0-9A-F]{2}$/.test(key)) continue;
-    if (!map[key]) map[key] = name;
-  }
-  return map;
-})();
-
-function hexFromName (name) {
-  const comp = (SHADES_OF_BLACK && SHADES_OF_BLACK[name]) ? String(SHADES_OF_BLACK[name]).toUpperCase().padStart(2, '0') : null;
-  if (!comp || !/^[0-9A-F]{2}$/.test(comp)) return null;
-  return `#${comp}${comp}${comp}`;
-}
-
-function nameFromHex (hex) {
-  if (!hex) return '';
-  const norm = normalizeHex6(hex);
-  if (!norm) return '';
-  const raw = norm.replace(/^#/, '');
-  const r = raw.slice(0,2), g = raw.slice(2,4), b = raw.slice(4,6);
-  if (r !== g || g !== b) return '';
-  return COMPONENT_TO_NAME[r] || '';
-}
-
 /* ----- helpers ------------------------------------------------------- */
 // History behavior: 'push' creates entries for each generation; 'replace' keeps a single entry so Back leaves the page
 let HISTORY_MODE = 'push'; // will be set in init() based on embed/flags
+let EMBEDDED = false;
+let lastHandledHash = null;
 
 function randomShade () {
   // Bias toward darker: square the RNG, cap to 0–63 (quarter range)
   const v   = Math.floor(Math.pow(Math.random(), 2) * 64);
   const hex = v.toString(16).padStart(2, '0');
   return `#${hex}${hex}${hex}`.toUpperCase();
-}
-
-function normalizeHex6 (s) {
-  if (!s) return null;
-  const raw = s.startsWith('#') ? s.slice(1) : s;
-  if (!/^[0-9a-fA-F]{6}$/.test(raw)) return null;
-  return `#${raw.toUpperCase()}`;
 }
 
 // Determine if background is light enough to require dark (black) text
@@ -63,24 +38,10 @@ function isLightBackground(hex) {
 
 function applyContrastStyles(col, hex) {
   const info = col.querySelector('.info');
-  const btn = col.querySelector('.lock-btn');
-  const locked = col.dataset.locked === 'true';
   const lightBg = isLightBackground(hex);
 
   // Text color for overlay
   info.style.color = lightBg ? '#000' : '#FFF';
-
-  // Adjust lock button appearance only when not locked; when locked, let CSS style take precedence
-  if (!locked) {
-    btn.style.color = lightBg ? '#000' : '#FFF';
-    btn.style.borderColor = lightBg ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,.85)';
-    btn.style.background = 'transparent';
-  } else {
-    // Clear inline to allow CSS state styles to apply
-    btn.style.removeProperty('color');
-    btn.style.removeProperty('border-color');
-    btn.style.removeProperty('background');
-  }
 }
 
 // Session-scoped usage counter (not persisted).
@@ -140,12 +101,9 @@ function columns () {
 }
 
 function isMobileLikeViewport () {
-  try {
-    if (window.matchMedia) {
-      if (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(hover: none)').matches) return true;
-    }
-  } catch { /* noop */ }
-  return window.innerWidth <= 700;
+  const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches || false;
+  const noHover = window.matchMedia?.('(hover: none)').matches || false;
+  return coarsePointer || noHover || window.innerWidth <= 700;
 }
 
 function stackHexForDisplay (hex) {
@@ -161,9 +119,9 @@ function renderStackedHex (hexEl, hex) {
     if (hexEl) hexEl.textContent = String(hex || '');
     return;
   }
-  const lines = parts.map((part, idx) => {
+  const lines = ['#', ...parts].map((part, idx) => {
     const line = document.createElement('span');
-    line.className = idx === 0 ? 'hex-line hex-line--first' : 'hex-line';
+    line.className = idx === 0 ? 'hex-line hex-line--hash' : 'hex-line hex-line--component';
     line.textContent = part;
     return line;
   });
@@ -179,25 +137,26 @@ function currentHashString () {
 }
 
 function buildOpenUrlWithState(baseUrl, { forceReplaceHistory = true } = {}) {
-  try {
-    const u = new URL(baseUrl, location.origin);
-    if (forceReplaceHistory) {
-      const existing = (u.searchParams.get('history') || u.searchParams.get('hist') || '').toLowerCase();
-      if (!existing) u.searchParams.set('history', 'replace');
-    }
-    const h = currentHashString();
-    if (h) u.hash = h;
-    return u.toString();
-  } catch {
-    // Fallback: naive concatenation
-    const q = forceReplaceHistory ? (baseUrl.includes('?') ? '&' : '?') + 'history=replace' : '';
-    const h = currentHashString();
-    return baseUrl + q + (h ? ('#' + h) : '');
+  const url = new URL(baseUrl, location.origin);
+  if (forceReplaceHistory) {
+    const existing = (url.searchParams.get('history') || url.searchParams.get('hist') || '').toLowerCase();
+    if (!existing) url.searchParams.set('history', 'replace');
   }
+  const hash = currentHashString();
+  if (hash) url.hash = hash;
+  return url.toString();
 }
 
-function broadcastStateToParent({ embedded }) {
-  if (!embedded) return;
+function syncLockIcon (btn, locked) {
+  const openIcon = btn?.querySelector('.lock-icon--open');
+  const closedIcon = btn?.querySelector('.lock-icon--closed');
+  if (!openIcon || !closedIcon) return;
+  openIcon.hidden = locked;
+  closedIcon.hidden = !locked;
+}
+
+function broadcastStateToParent() {
+  if (!EMBEDDED) return;
   const payload = {
     type: 'palette:update',
     app: 'color-palette-generator',
@@ -207,23 +166,24 @@ function broadcastStateToParent({ embedded }) {
     // Suggest adding history=replace when opening the full app, so Back returns to referrer
     suggest: { history: 'replace' }
   };
-  try { window.parent.postMessage(payload, '*'); } catch { /* noop */ }
+  // The app supports unknown embedding hosts and sends only public palette state,
+  // so a wildcard target is intentional. The host must still validate message origin.
+  window.parent.postMessage(payload, '*');
 }
 
-function setColumnShade (col, hex, name = null) {
-  const info = col.querySelector('.info');
-  col.style.backgroundColor = hex;
-  col.style.backgroundImage = 'none';
-  col.dataset.shade = hex;
-  const embedded = document.documentElement.classList.contains('embedded');
+function renderColumnHexLabel(col) {
+  const hex = normalizeHex6(col.dataset.shade);
+  const hexEl = col.querySelector('.hex');
+  if (!hex || !hexEl) return;
+
   const mobileLike = isMobileLikeViewport();
-  const compactHex = hex.replace(/^#/, '').slice(0, 2);
-  const stackHex = mobileLike && !embedded;
+  const stackHex = mobileLike && !EMBEDDED;
   let displayHex = hex;
-  if (embedded && mobileLike) {
-    displayHex = `#${compactHex}`;
+  if (EMBEDDED && mobileLike) {
+    // Compact grayscale-component notation: #VV represents #VVVVVV because R = G = B.
+    displayHex = compactGrayscaleLabel(hex);
   }
-  const hexEl = info.querySelector('.hex');
+
   if (stackHex) {
     hexEl.classList.add('hex-stacked');
     renderStackedHex(hexEl, hex);
@@ -231,14 +191,29 @@ function setColumnShade (col, hex, name = null) {
     hexEl.classList.remove('hex-stacked');
     hexEl.textContent = displayHex;
   }
-  const nameEl = info.querySelector('.name');
-  const resolved = name || nameFromHex(hex) || '';
-  nameEl.textContent = resolved;
+  hexEl.setAttribute('aria-label', `Copy ${hex}`);
+  hexEl.title = `Copy ${hex}`;
+
   if (stackHex) {
     hexEl.style.removeProperty('font-size');
   } else {
     adaptSingleLine(hexEl);
   }
+}
+
+function setColumnShade (col, value, name = null) {
+  const hex = normalizeHex6(value);
+  if (!hex || !grayscaleComponentFromHex(hex)) {
+    throw new TypeError(`Invalid six-digit grayscale palette color: ${value}`);
+  }
+
+  col.style.backgroundColor = hex;
+  col.style.backgroundImage = 'none';
+  col.dataset.shade = hex;
+  const nameEl = col.querySelector('.name');
+  const resolved = name || nameFromHex(hex) || '';
+  nameEl.textContent = resolved;
+  renderColumnHexLabel(col);
   applyContrastStyles(col, hex);
 }
 
@@ -255,30 +230,38 @@ function adaptSingleLine(el, { minScale = 0.75 } = {}) {
   }
 }
 
-function updateHashFromDOM() {
+function persistCurrentPalette(historyMode) {
+  if (historyMode === 'none') return;
+  if (historyMode !== 'push' && historyMode !== 'replace') {
+    throw new TypeError(`Unsupported history mode: ${historyMode}`);
+  }
+
   const nextHash = currentHashString();
   if (!nextHash) return;
-  try {
-    const url = new URL(location.href);
-    url.hash = nextHash;
-    if (HISTORY_MODE === 'replace') {
-      history.replaceState(history.state, '', url.toString());
-    } else {
-      history.pushState(history.state, '', url.toString());
-    }
-  } catch {
-    location.hash = nextHash;
+  const url = new URL(location.href);
+  url.hash = nextHash;
+  if (historyMode === 'replace') {
+    history.replaceState(history.state, '', url.toString());
+  } else if (url.toString() !== location.href) {
+    history.pushState(history.state, '', url.toString());
   }
+  lastHandledHash = url.hash;
 }
 
 function parseHash () {
   const h = location.hash.replace(/^#/, '');
   if (!h) return null;
-  const parts = h.split('-').map(normalizeHex6).filter(Boolean);
-  return parts.length ? parts : null;
+  const rawParts = h.split('-');
+  const parts = rawParts.map(normalizeHex6);
+  if (parts.some(hex => !hex || !grayscaleComponentFromHex(hex))) return null;
+  return parts;
 }
 
-function applyShades (shades, overwriteLocked = false) {
+function commitPalette(shades, {
+  overwriteLocked = false,
+  historyMode = 'none',
+  notifyParent = true
+} = {}) {
   const cols = columns();
   const count = Math.min(cols.length, shades.length);
   for (let i = 0; i < count; i++) {
@@ -287,9 +270,9 @@ function applyShades (shades, overwriteLocked = false) {
     if (locked && !overwriteLocked) continue;
     setColumnShade(col, shades[i]);
   }
-  updateHashFromDOM();
-  broadcastStateToParent({ embedded: document.documentElement.classList.contains('embedded') });
   reflowHexLabels();
+  persistCurrentPalette(historyMode);
+  if (notifyParent) broadcastStateToParent();
 }
 
 function toggleLock (col) {
@@ -299,12 +282,11 @@ function toggleLock (col) {
   const btn = col.querySelector('.lock-btn');
   if (btn) {
     btn.setAttribute('aria-pressed', next);
+    syncLockIcon(btn, next === 'true');
     const idx = (parseInt(col.dataset.index, 10) || 0) + 1;
     btn.title = (next === 'true') ? `Unlock (${idx})` : `Lock (${idx})`;
+    btn.setAttribute('aria-label', (next === 'true') ? `Unlock column ${idx}` : `Lock column ${idx}`);
   }
-  // Re-apply contrast styling since lock visuals may change
-  const hex = col.dataset.shade || '#000000';
-  applyContrastStyles(col, hex);
 }
 
 function copyToClipboard (text) {
@@ -321,7 +303,11 @@ function copyToClipboard (text) {
   });
 }
 
-function generate ({respectLocks = true} = {}) {
+function generate ({
+  respectLocks = true,
+  historyMode = HISTORY_MODE,
+  notifyParent = true
+} = {}) {
   const cols = columns();
   const targets = respectLocks ? cols.filter(c => c.dataset.locked !== 'true') : cols;
   const exclude = new Set();
@@ -330,28 +316,41 @@ function generate ({respectLocks = true} = {}) {
   }
   const toFill = targets.length;
   const newHexes = buildUniqueHexes(toFill, exclude, sessionUsage, 1.0);
+  const nextShades = currentShadesHexList();
   let idx = 0;
   targets.forEach(col => {
     const hex = newHexes[idx++];
-    const resolvedName = nameFromHex(hex) ?? '';
-    setColumnShade(col, hex, resolvedName);
+    nextShades[Number(col.dataset.index)] = hex;
     bumpUsage(sessionUsage, hex, 1);
   });
-  updateHashFromDOM();
-  reflowHexLabels();
+  commitPalette(nextShades, { overwriteLocked: true, historyMode, notifyParent });
 }
 
 function reflowHexLabels() {
-  const embedded = document.documentElement.classList.contains('embedded');
-  const stackHex = isMobileLikeViewport() && !embedded;
-  columns().forEach(col => {
-    const hexEl = col.querySelector('.hex');
-    if (!hexEl) return;
-    if (stackHex) {
-      hexEl.style.removeProperty('font-size');
-      return;
-    }
-    adaptSingleLine(hexEl);
+  columns().forEach(renderColumnHexLabel);
+}
+
+function completePalette(shades, count) {
+  const base = shades.slice(0, count);
+  const exclude = new Set(base.map(hex => String(hex).toUpperCase()));
+  const extrasNeeded = Math.max(0, count - base.length);
+  return extrasNeeded > 0
+    ? [...base, ...buildUniqueHexes(extrasNeeded, exclude, sessionUsage, 1.0)]
+    : base;
+}
+
+function applyPaletteFromLocation() {
+  if (location.hash === lastHandledHash) return;
+  const parts = parseHash();
+  if (!parts) {
+    console.error(`Ignored invalid palette hash: ${location.hash}`);
+    return;
+  }
+  lastHandledHash = location.hash;
+  commitPalette(completePalette(parts, columns().length), {
+    overwriteLocked: true,
+    historyMode: 'none',
+    notifyParent: true
   });
 }
 
@@ -359,6 +358,15 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
   const cols = columns();
   const embedded = Boolean(opts.embedded);
   const allowKeyboard = (opts.allowKeyboard === undefined) ? !embedded : Boolean(opts.allowKeyboard);
+
+  const skipLink = document.querySelector('.skip-link');
+  const main = document.getElementById('main-content');
+  skipLink?.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (!main) return;
+    main.setAttribute('tabindex', '-1');
+    main.focus({ preventScroll: true });
+  });
 
   // Lock buttons
   cols.forEach(col => {
@@ -376,14 +384,16 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
       if (e.target.closest && e.target.closest('.lock-btn')) return;
       const hexEl = col.querySelector('.hex');
       const nameEl = col.querySelector('.name');
+      const statusEl = col.querySelector('.copy-status');
       const fullHex = col.dataset.shade || hexEl.textContent;
-      const mqlCoarse = window.matchMedia ? (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(hover: none)').matches) : ('ontouchstart' in window);
+      const mqlCoarse = window.matchMedia?.('(pointer: coarse)').matches || window.matchMedia?.('(hover: none)').matches || false;
       // Cleanup prior hints
       if (col._copiedHintTimeout) { clearTimeout(col._copiedHintTimeout); col._copiedHintTimeout = null; }
       const existingHint = col.querySelector('.copied-hint');
       if (existingHint) existingHint.remove();
       try {
         await copyToClipboard(fullHex);
+        if (statusEl) statusEl.textContent = `${fullHex} copied`;
         if (mqlCoarse) {
           const hint = document.createElement('div');
           hint.className = 'copied-hint';
@@ -400,6 +410,7 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
           }, 800);
         }
       } catch {
+        if (statusEl) statusEl.textContent = `Could not copy ${fullHex}`;
         if (mqlCoarse) {
           const hint = document.createElement('div');
           hint.className = 'copied-hint';
@@ -420,9 +431,11 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
   if (allowKeyboard) {
     const isSpace = (e) => (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar');
     const isEnter = (e) => (e.code === 'Enter' || e.key === 'Enter' || e.code === 'NumpadEnter');
+    const isInteractiveTarget = (target) => Boolean(target?.closest?.(
+      'a[href], button, input, textarea, select, summary, [contenteditable]:not([contenteditable="false"]), [role="button"], [role="link"], [role="textbox"], [role="checkbox"], [role="radio"], [role="switch"], [role="slider"]'
+    ));
     const handleKeyDown = (e) => {
-      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
-      if (tag === 'input' || tag === 'textarea' || e.isComposing) return;
+      if (e.isComposing || isInteractiveTarget(e.target)) return;
 
       if (isSpace(e) || isEnter(e)) {
         e.preventDefault();
@@ -439,40 +452,29 @@ function attachEvents (opts = { embedded: false, allowKeyboard: undefined }) {
         }
       }
     };
-    const handleKeyUp = (e) => {
-      if (isSpace(e) || isEnter(e)) {
-        // Prevent default button/link activation on keyup when using shortcuts
-        e.preventDefault();
-      }
-    };
-    // Capture early to suppress default actions like button "click on Space/Enter"
-    window.addEventListener('keydown', handleKeyDown, { capture: true });
-    window.addEventListener('keyup', handleKeyUp, { capture: true });
+    window.addEventListener('keydown', handleKeyDown);
   }
 
   // Generate button
   const btn = document.getElementById('generateBtn');
   if (btn) btn.addEventListener('click', () => generate({respectLocks: true}));
 
-  // React to hash changes (e.g., back/forward)
-  window.addEventListener('hashchange', () => {
-    const parts = parseHash();
-    if (parts) applyShades(parts, false);
-  });
+  // Both events are needed: popstate covers History API traversal and hashchange
+  // covers direct fragment edits. lastHandledHash prevents duplicate processing.
+  window.addEventListener('hashchange', applyPaletteFromLocation);
+  window.addEventListener('popstate', applyPaletteFromLocation);
 
-  // Also react to popstate (when history.pushState/replaceState is used)
-  window.addEventListener('popstate', () => {
-    const parts = parseHash();
-    if (parts) applyShades(parts, false);
-  });
+  const presentationMedia = window.matchMedia?.('(max-width: 700px), (hover: none), (pointer: coarse)');
+  presentationMedia?.addEventListener('change', reflowHexLabels);
 }
 
 function init () {
   // Treat as embedded when inside an iframe OR when the URL has ?embed=1
   const qp = new URLSearchParams(location.search || '');
-  const embedFlag = qp.has('embed') && qp.get('embed') !== '0' && qp.get('embed') !== 'false';
-  const inFrame = (() => { try { return window.self !== window.top; } catch { return true; } })();
-  const embedded = inFrame || embedFlag;
+  const embedValue = (qp.get('embed') || '').toLowerCase();
+  const embedFlag = qp.has('embed') && !['0', 'false', 'off'].includes(embedValue);
+  const inFrame = window.self !== window.top;
+  EMBEDDED = inFrame || embedFlag;
 
   // Determine history mode. Defaults: embedded -> replace (Back leaves page), direct -> push (Back cycles palettes)
   const histRaw = (qp.get('history') || qp.get('hist') || '').toLowerCase();
@@ -480,87 +482,38 @@ function init () {
     if (['replace', 'r', '0', 'false', 'off'].includes(histRaw)) HISTORY_MODE = 'replace';
     else if (['push', 'p', '1', 'true', 'on'].includes(histRaw)) HISTORY_MODE = 'push';
   } else {
-    HISTORY_MODE = embedded ? 'replace' : 'push';
+    HISTORY_MODE = EMBEDDED ? 'replace' : 'push';
   }
 
   // Optionally allow keyboard shortcuts even when embedded with ?keys=1 or ?keyboard=1/true
-  const allowKeyboard = !embedded || ['1','true','on'].includes((qp.get('keys') || '').toLowerCase()) || ['1','true','on'].includes((qp.get('keyboard') || '').toLowerCase());
+  const allowKeyboard = !EMBEDDED || ['1','true','on'].includes((qp.get('keys') || '').toLowerCase()) || ['1','true','on'].includes((qp.get('keyboard') || '').toLowerCase());
 
   // Capture optional embedding context to include in messages (helps when multiple iframes on a page)
   EMBED_CTX = qp.get('ctx') || qp.get('id') || qp.get('source') || null;
 
   // Tag root element to enable CSS overrides when embedded
   const root = document.documentElement;
-  if (embedded) root.classList.add('embedded');
-
-  // If embedded, ensure nothing is auto-focused (e.g., the Generate button)
-  if (embedded) {
-    const gb = document.getElementById('generateBtn');
-    if (gb) {
-      gb.removeAttribute('autofocus');
-      if (document.activeElement === gb) {
-        try { gb.blur(); } catch { /* noop */ }
-      }
-    }
-  }
+  root.classList.toggle('embedded', EMBEDDED);
 
   const cols = columns();
   cols.forEach((col, i) => {
     col.dataset.index = String(i);
     col.dataset.locked = col.dataset.locked || 'false';
-    if (embedded) col.removeAttribute('title'); // avoid implying copy hint inside iframes
+    syncLockIcon(col.querySelector('.lock-btn'), col.dataset.locked === 'true');
+    if (EMBEDDED) col.removeAttribute('title'); // avoid implying full-column copy hint inside iframes
   });
 
-  // Ensure the page is focusable so key events are captured without a click (not when embedded)
-  const ensureFocus = () => {
-    if (embedded) return;
-    if (document.visibilityState && document.visibilityState !== 'visible') return;
-    const container = document.querySelector('.container');
-    const target = container || document.body;
-    if (!target) return;
-    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
-    try { target.focus({ preventScroll: true }); } catch { /* noop */ }
-    try { window.focus(); } catch { /* noop */ }
-    // Fallback: if focus didn't stick, try body on next tick
-    requestAnimationFrame(() => {
-      const ae = document.activeElement;
-      if (!ae || ae === document.body || ae === document.documentElement) {
-        try {
-          if (!document.body.hasAttribute('tabindex')) document.body.setAttribute('tabindex', '-1');
-          document.body.focus({ preventScroll: true });
-        } catch { /* noop */ }
-      }
-    });
-  };
-
-  // Try focusing ASAP and also when page becomes fully shown
-  if (!embedded) {
-    // After DOM is ready
-    requestAnimationFrame(ensureFocus);
-    // When page loaded (all resources) or restored from bfcache
-    window.addEventListener('load', ensureFocus, { once: true });
-    window.addEventListener('pageshow', (e) => { if (e.persisted) ensureFocus(); });
-    document.addEventListener('visibilitychange', ensureFocus);
-    // When the window/tab gains focus, try to ensure key handling works instantly
-    window.addEventListener('focus', ensureFocus);
-  }
-
-  attachEvents({ embedded, allowKeyboard });
+  attachEvents({ embedded: EMBEDDED, allowKeyboard });
 
   const fromHash = parseHash();
   if (fromHash) {
-    const need = cols.length;
-    const base = fromHash.slice(0, need);
-    const exclude = new Set(base.map(h => String(h).toUpperCase()));
-    const extrasNeeded = Math.max(0, need - base.length);
-    if (extrasNeeded > 0) {
-      const extraHexes = buildUniqueHexes(extrasNeeded, exclude, sessionUsage, 1.0);
-      applyShades([...base, ...extraHexes], true);
-    } else {
-      applyShades(base, true);
-    }
+    commitPalette(completePalette(fromHash, cols.length), {
+      overwriteLocked: true,
+      historyMode: 'replace',
+      notifyParent: false
+    });
   } else {
-    generate({respectLocks: false});
+    generate({ respectLocks: false, historyMode: 'replace', notifyParent: false });
   }
 
   // Ensure initial contrast styles are applied
@@ -568,9 +521,9 @@ function init () {
   reflowHexLabels();
 
   // Expose a tiny helper on window for host pages or dev tools
-  try { window.PaletteLinkManager = { buildOpenUrlWithState }; } catch { /* noop */ }
+  window.PaletteLinkManager = { buildOpenUrlWithState };
   // Send initial state to parent (for embedded open button wiring)
-  broadcastStateToParent({ embedded });
+  broadcastStateToParent();
 }
 
 // Boot

@@ -60,3 +60,7 @@ coverage/
 # MacOS storage
 .AppleDouble
 .LSOverride
+
+# Generated app-map screenshots
+docs/app-map/images/
+

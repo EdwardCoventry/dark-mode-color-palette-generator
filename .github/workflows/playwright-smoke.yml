@@ -6,8 +6,32 @@ on:
   workflow_dispatch:
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout app
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
   smoke:
-    if: ${{ vars.PLAYWRIGHT_SMOKE_REPO != '' }}
+    if: ${{ vars.PLAYWRIGHT_SMOKE_REPO != '' && vars.PLAYWRIGHT_SMOKE_REF != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout app
@@ -19,6 +43,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ vars.PLAYWRIGHT_SMOKE_REPO }}
+          ref: ${{ vars.PLAYWRIGHT_SMOKE_REF }}
           path: shared-smoke
 
       - name: Setup Node
@@ -52,8 +77,8 @@ jobs:
           if-no-files-found: ignore
 
   smoke-not-configured:
-    if: ${{ vars.PLAYWRIGHT_SMOKE_REPO == '' }}
+    if: ${{ vars.PLAYWRIGHT_SMOKE_REPO == '' || vars.PLAYWRIGHT_SMOKE_REF == '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Missing shared smoke repo variable
-        run: echo "::notice::Set the PLAYWRIGHT_SMOKE_REPO repository variable to enable shared Playwright smoke CI."
+        run: echo "::notice::Set PLAYWRIGHT_SMOKE_REPO and a pinned PLAYWRIGHT_SMOKE_REF to enable shared Playwright smoke CI. Repository build and tests still run in the verify job."

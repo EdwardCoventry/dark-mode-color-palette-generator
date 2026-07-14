@@ -4,16 +4,16 @@ import { describe, expect, it, vi } from 'vitest';
 const buildPaletteHtml = () => `
   <div class="container">
     <div class="controls">
-      <div class="kbd-hint">Space to generate • 1–4 to lock</div>
       <button id="generateBtn" class="button">Generate</button>
     </div>
     <div class="color-columns">
       ${[0, 1, 2, 3].map((i) => `
         <div class="color-col" id="col${i}" data-index="${i}" data-locked="false">
           <div class="info">
-            <button class="lock-btn" aria-pressed="false">🔒</button>
-            <div class="hex"></div>
+            <button class="lock-btn" aria-pressed="false"><ph-lock-open class="lock-icon lock-icon--open" size="1em" weight="bold" aria-hidden="true"></ph-lock-open><ph-lock class="lock-icon lock-icon--closed" size="1em" weight="fill" aria-hidden="true" hidden></ph-lock></button>
+            <button class="hex copy-btn" type="button"></button>
             <div class="name"></div>
+            <span class="copy-status" role="status"></span>
           </div>
         </div>
       `).join('')}
@@ -82,16 +82,46 @@ describe('palette generator', () => {
     const hexEl = document.querySelector('.color-col .hex');
     expect(hexEl?.classList.contains('hex-stacked')).toBe(true);
     const lines = [...(hexEl?.querySelectorAll('.hex-line') || [])];
-    expect(lines).toHaveLength(3);
-    lines.forEach((line) => {
+    expect(lines).toHaveLength(4);
+    expect(lines[0]?.textContent).toBe('#');
+    expect(lines[0]?.classList.contains('hex-line--hash')).toBe(true);
+    lines.slice(1).forEach((line) => {
       expect(line.textContent).toMatch(/^[0-9A-F]{2}$/);
+      expect(line.classList.contains('hex-line--component')).toBe(true);
     });
-    expect(hexEl?.querySelector('.hex-line--first')).not.toBeNull();
+  });
+
+  it('uses distinct heavy icon states when locking and unlocking', async () => {
+    await loadApp();
+    const button = document.querySelector('#col0 .lock-btn');
+    const openIcon = button?.querySelector('.lock-icon--open');
+    const closedIcon = button?.querySelector('.lock-icon--closed');
+
+    expect(openIcon?.hidden).toBe(false);
+    expect(closedIcon?.hidden).toBe(true);
+    expect(button?.style.background).toBe('');
+    expect(button?.style.borderColor).toBe('');
+    expect(button?.style.color).toBe('');
+
+    button?.click();
+    expect(openIcon?.hidden).toBe(true);
+    expect(closedIcon?.hidden).toBe(false);
+    expect(button?.style.background).toBe('');
+    expect(button?.style.borderColor).toBe('');
+    expect(button?.style.color).toBe('');
+
+    button?.click();
+    expect(openIcon?.hidden).toBe(false);
+    expect(closedIcon?.hidden).toBe(true);
   });
 
   it('uses compact hex with # when embedded and small', async () => {
     await loadApp({ embedded: true, width: 600 });
-    const hexText = document.querySelector('.color-col .hex')?.textContent || '';
-    expect(hexText).toMatch(/^#[0-9A-F]{2}$/);
+    const hexEl = document.querySelector('.color-col .hex');
+    const compactLabel = hexEl?.textContent || '';
+    const fullHex = document.querySelector('.color-col')?.dataset.shade || '';
+    expect(compactLabel).toBe(`#${fullHex.slice(1, 3)}`);
+    expect(fullHex).toBe(`${compactLabel}${compactLabel.slice(1)}${compactLabel.slice(1)}`);
+    expect(hexEl?.getAttribute('aria-label')).toBe(`Copy ${fullHex}`);
   });
 });

@@ -1,21 +1,30 @@
 {
-  "name": "color-pallet-generator",
+  "name": "color-palette-generator",
   "version": "1.0.0",
   "private": true,
   "description": "Simple grayscale color palette generator (Vite)",
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
-    "dev": "vite",
+    "predev": "node ../../scripts/netlify/check-local-dev.mjs",
+    "dev": "node ./scripts/smart-dev.mjs --preferred-port 5406 --match \"<title>Color Palette Generator</title>\" --match \"/color-palette-generator.html\" -- node ./node_modules/vite/bin/vite.js --host __HOST__ --port __PORT__",
     "build": "vite build",
     "smoke": "node ../../scripts/playwright-smoke/run-app.mjs dark-mode-color-palette-generator --build",
     "smoke:fast": "node ../../scripts/playwright-smoke/run-app.mjs dark-mode-color-palette-generator",
+    "app-map": "node ../../scripts/app-map-generator/run.mjs --app dark-mode-color-palette-generator --build",
+    "app-map:fast": "node ../../scripts/app-map-generator/run.mjs --app dark-mode-color-palette-generator",
     "preview": "vite preview",
     "test": "vitest run"
   },
   "devDependencies": {
-    "jsdom": "^28.0.0",
-    "playwright": "^1.58.2",
-    "vite": "^5.4.10",
-    "vitest": "^4.0.18"
+    "jsdom": "^29.1.1",
+    "playwright": "^1.61.1",
+    "vite": "^8.1.4",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@phosphor-icons/webcomponents": "^2.1.5"
   }
 }

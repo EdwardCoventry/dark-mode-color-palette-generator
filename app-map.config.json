@@ -1,0 +1,62 @@
+{
+  "appPurpose": "Palette design tool for generating dark-mode-friendly color systems, locking columns, and copying color values.",
+  "ignoredRoutes": [
+    "/"
+  ],
+  "preferredSourceFiles": [
+    "color-palette-generator.html",
+    "embed.html",
+    "src/js/pages/color-palette-generator.js",
+    "src/js/palette/palette-model.js",
+    "src/styles.css"
+  ],
+  "routeTitles": {
+    "/color-palette-generator.html": "Color Palette Generator",
+    "/embed.html": "Color Palette Generator Embed"
+  },
+  "routeNotes": {
+    "/color-palette-generator.html": "Main palette builder with lockable columns, generated swatches, and copy-oriented controls.",
+    "/embed.html": "Embedded presentation of the palette generator for use in framed or proxied contexts."
+  },
+  "routeRuntimeUrls": {
+    "/color-palette-generator.html": "/color-palette-generator.html#111111-222222-333333-444444",
+    "/embed.html": "/embed.html#111111-222222-333333-444444"
+  },
+  "routeInteractions": {
+    "/color-palette-generator.html": [
+      {
+        "id": "lock-first-column",
+        "label": "Lock the first palette column",
+        "steps": [
+          {
+            "action": {
+              "role": "button",
+              "name": "Lock column 1"
+            },
+            "expect": {
+              "selector": "#col0[data-locked='true'] .lock-btn[aria-pressed='true']"
+            }
+          }
+        ]
+      }
+    ],
+    "/embed.html": [
+      {
+        "id": "lock-first-column",
+        "label": "Lock the first palette column",
+        "steps": [
+          {
+            "action": {
+              "role": "button",
+              "name": "Lock column 1"
+            },
+            "expect": {
+              "selector": "#col0[data-locked='true'] .lock-btn[aria-pressed='true']"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "safeInteractionLabels": []
+}

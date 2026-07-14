@@ -1,9 +1,0 @@
-class SiteHeader extends HTMLElement {
-  connectedCallback() {
-    if (this._mounted) return;
-    this._mounted = true;
-    this.innerHTML = '';
-  }
-}
-customElements.define('site-header', SiteHeader);
-

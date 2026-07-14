@@ -11,36 +11,21 @@
     <title>Color Palette Generator</title>
     <script>
         (function () {
-            try {
-                var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
-                var target = isLocal ? '/color-palette-generator.html' : '/apps/color-palette-generator';
-                var qp = new URLSearchParams(window.location.search || '');
-                // Ensure full-page: remove any embed flag arriving from elsewhere
-                if (qp.has('embed')) qp.delete('embed');
-                var qs = qp.toString();
-                var next = target + (qs ? ('?' + qs) : '') + (window.location.hash || '');
-                var current = window.location.pathname + window.location.search + window.location.hash;
-                if (current !== next) {
-                    window.location.replace(next);
-                }
-            } catch (e) { /* noop */ }
+            var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
+            var target = isLocal ? '/color-palette-generator.html' : '/apps/color-palette-generator';
+            var qp = new URLSearchParams(window.location.search || '');
+            // Ensure full-page: remove any embed flag arriving from elsewhere.
+            if (qp.has('embed')) qp.delete('embed');
+            var qs = qp.toString();
+            var next = target + (qs ? ('?' + qs) : '') + (window.location.hash || '');
+            var current = window.location.pathname + window.location.search + window.location.hash;
+            if (current !== next) window.location.replace(next);
         })();
     </script>
 </head>
 <body>
 <noscript>
-    <p>
-        Redirecting to
-        <span id="ns-target">/apps/color-palette-generator</span>
-        …
-    </p>
-    <script>
-        (function(){
-            var isLocal = /localhost|127\.0\.0\.1/.test(window.location.host);
-            var target = isLocal ? '/color-palette-generator.html' : '/apps/color-palette-generator';
-            document.getElementById('ns-target').textContent = target;
-        })();
-    </script>
+    <p>This palette generator requires JavaScript. Open the <a href="/color-palette-generator.html">application page</a> after enabling it.</p>
 </noscript>
 </body>
 </html>

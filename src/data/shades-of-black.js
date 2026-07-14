@@ -1,4 +1,3 @@
-// Core bootstrapping (placeholder). Non-module script included early.
 // Grayscale name pool mapping to two-digit hex components (00–FF).
 // Full color is #VVVVVV for component V.
 export const SHADES_OF_BLACK = {
