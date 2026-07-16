@@ -68,13 +68,36 @@ status = 200
 for = "/embed"
 [headers.values]
 X-Robots-Tag = "noindex, nofollow"
+Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
 for = "/embed/*"
 [headers.values]
 X-Robots-Tag = "noindex, nofollow"
+Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
 for = "/index.html"
 [headers.values]
 X-Robots-Tag = "noindex, nofollow"
+Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/version.json"
+[headers.values]
+Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/*.html"
+[headers.values]
+Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/assets/*"
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/apps/color-palette-generator/assets/*"
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"

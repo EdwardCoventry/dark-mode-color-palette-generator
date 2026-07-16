@@ -10,7 +10,7 @@
   "scripts": {
     "predev": "node ../../scripts/netlify/check-local-dev.mjs",
     "dev": "node ./scripts/smart-dev.mjs --preferred-port 5406 --match \"<title>Color Palette Generator</title>\" --match \"/color-palette-generator.html\" -- node ./node_modules/vite/bin/vite.js --host __HOST__ --port __PORT__",
-    "build": "vite build",
+    "build": "vite build && node scripts/write-deploy-version.mjs",
     "smoke": "node ../../scripts/playwright-smoke/run-app.mjs dark-mode-color-palette-generator --build",
     "smoke:fast": "node ../../scripts/playwright-smoke/run-app.mjs dark-mode-color-palette-generator",
     "app-map": "node ../../scripts/app-map-generator/run.mjs --app dark-mode-color-palette-generator --build",

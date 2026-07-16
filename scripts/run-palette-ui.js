@@ -29,19 +29,21 @@ const assertMatches = (hex, rgb, index) => {
 const defaultOptions = {
   clicks: 10,
   width: 1280,
-  height: 800
+  height: 800,
+  port: Number(process.env.PALETTE_UI_PORT) || 0
 };
 
 export async function runPaletteUiCheck(options = {}) {
-  const { clicks, width, height } = { ...defaultOptions, ...options };
+  const { clicks, width, height, port } = { ...defaultOptions, ...options };
   const server = await createServer({
     root: process.cwd(),
     logLevel: 'error',
-    server: { host: '127.0.0.1', port: 4173, strictPort: true }
+    server: { host: '127.0.0.1', port, strictPort: port > 0 }
   });
 
   await server.listen();
-  const baseUrl = server.resolvedUrls?.local?.[0] || 'http://127.0.0.1:4173/';
+  const baseUrl = server.resolvedUrls?.local?.[0];
+  if (!baseUrl) throw new Error('Palette UI test server did not publish a local URL.');
   const targetUrl = `${baseUrl.replace(/\/$/, '')}/color-palette-generator.html`;
 
   const browser = await chromium.launch({ headless: true });
