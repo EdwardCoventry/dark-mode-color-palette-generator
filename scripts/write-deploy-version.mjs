@@ -5,15 +5,10 @@ import {dirname, resolve} from 'node:path';
 const APP_ID = 'color-palette-generator';
 const outputPath = resolve('dist/version.json');
 
-function gitCommit() {
-  try {
-    return execFileSync('git', ['rev-parse', 'HEAD'], {encoding: 'utf8'}).trim();
-  } catch {
-    return 'unknown';
-  }
-}
-
-const commit = process.env.COMMIT_REF || process.env.GITHUB_SHA || gitCommit();
+const commit =
+  process.env.COMMIT_REF ||
+  process.env.GITHUB_SHA ||
+  execFileSync('git', ['rev-parse', 'HEAD'], {encoding: 'utf8'}).trim();
 const deployId = process.env.DEPLOY_ID || null;
 const version = {
   schemaVersion: 1,
