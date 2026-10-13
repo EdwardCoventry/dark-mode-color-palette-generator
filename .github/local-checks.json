@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "tasks": {
+    "check": [
+      {
+        "name": "test",
+        "command": ["npm", "run", "test"],
+        "cwd": "."
+      },
+      {
+        "name": "smoke",
+        "command": ["npm", "run", "smoke"],
+        "cwd": "."
+      }
+    ]
+  }
+}
